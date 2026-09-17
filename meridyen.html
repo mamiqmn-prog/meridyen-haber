@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridyen — Bağımsız Haber Merkezi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAFAF6;
+  --paper-raised:#FFFFFF;
+  --ink:#181A1F;
+  --ink-soft:#565B66;
+  --ink-faint:#8A8F99;
+  --navy:#14213D;
+  --navy-soft:#26355C;
+  --red:#AE2820;
+  --red-soft:#C9483F;
+  --line:#DEDACD;
+  --line-strong:#C7C2B2;
+  --font-display:'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-body:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --radius:2px;
+}
+:root:not([data-theme="light"]){
+  @media (prefers-color-scheme: dark){
+    --paper:#15161A;
+    --paper-raised:#1D1F25;
+    --ink:#ECEBE6;
+    --ink-soft:#B4B7BF;
+    --ink-faint:#797E88;
+    --navy:#0E1626;
+    --navy-soft:#1B2740;
+    --line:#33353D;
+    --line-strong:#43454E;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#15161A;
+  --paper-raised:#1D1F25;
+  --ink:#ECEBE6;
+  --ink-soft:#B4B7BF;
+  --ink-faint:#797E88;
+  --navy:#0E1626;
+  --navy-soft:#1B2740;
+  --line:#33353D;
+  --line-strong:#43454E;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+img,svg{max-width:100%;display:block;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;}
+input,textarea,select{font-family:inherit;}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px;}
+:focus-visible{outline:2px solid var(--red-soft);outline-offset:2px;}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;}
+}
+
+/* ---------- Masthead ---------- */
+.masthead{border-bottom:1px solid var(--line);background:var(--paper);position:sticky;top:0;z-index:50;}
+.masthead-top{display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px;gap:16px;}
+.brand{display:flex;align-items:baseline;gap:10px;cursor:pointer;}
+.brand-mark{font-family:var(--font-display);font-style:italic;font-weight:600;font-size:30px;letter-spacing:-0.01em;color:var(--navy);}
+:root[data-theme="dark"] .brand-mark, :root:not([data-theme="light"]) .brand-mark{ }
+@media (prefers-color-scheme: dark){ .brand-mark{color:#E7CDA9;} }
+:root[data-theme="dark"] .brand-mark{color:#E7CDA9;}
+.brand-tag{font-size:12px;color:var(--ink-faint);border-left:1px solid var(--line-strong);padding-left:10px;display:none;}
+.masthead-date{font-size:13px;color:var(--ink-faint);}
+.masthead-actions{display:flex;align-items:center;gap:14px;}
+.icon-btn{background:none;border:none;padding:6px;color:var(--ink);display:flex;align-items:center;border-radius:var(--radius);}
+.icon-btn:hover{color:var(--red);}
+.search-box{display:flex;align-items:center;border:1px solid var(--line-strong);border-radius:20px;padding:6px 12px;gap:8px;max-width:220px;}
+.search-box input{border:none;background:none;outline:none;font-size:13px;width:100%;color:var(--ink);}
+.search-box svg{flex-shrink:0;color:var(--ink-faint);}
+.hamburger{display:none;}
+nav.catnav{border-top:1px solid var(--line);overflow-x:auto;scrollbar-width:none;}
+nav.catnav::-webkit-scrollbar{display:none;}
+nav.catnav ul{display:flex;list-style:none;margin:0;padding:0;gap:2px;white-space:nowrap;}
+nav.catnav a{display:block;padding:11px 14px;font-size:13.5px;font-weight:500;color:var(--ink-soft);border-bottom:2px solid transparent;}
+nav.catnav a:hover, nav.catnav a.active{color:var(--red);border-bottom-color:var(--red);}
+nav.catnav a.home-link{color:var(--navy);font-weight:600;}
+@media (prefers-color-scheme: dark){ nav.catnav a.home-link{color:#E7CDA9;} }
+:root[data-theme="dark"] nav.catnav a.home-link{color:#E7CDA9;}
+
+@media (max-width:720px){
+  .masthead-date{display:none;}
+  .search-box{display:none;}
+}
+
+/* ---------- Breaking ticker ---------- */
+.ticker{background:var(--red);color:#fff;overflow:hidden;position:relative;}
+.ticker-inner{display:flex;align-items:center;gap:24px;}
+.ticker-label{flex-shrink:0;background:rgba(0,0,0,0.18);padding:7px 14px;font-size:12px;font-weight:700;letter-spacing:0.02em;}
+.ticker-track{display:flex;gap:48px;white-space:nowrap;animation:ticker-scroll 32s linear infinite;padding:7px 0;font-size:13px;}
+.ticker:hover .ticker-track{animation-play-state:paused;}
+@keyframes ticker-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.ticker-track a{opacity:0.95;}
+.ticker-track a:hover{text-decoration:underline;}
+
+/* ---------- Hero ---------- */
+.hero{display:grid;grid-template-columns:1.5fr 1fr;gap:28px;padding:32px 0 8px;}
+.hero-main a.card-link{display:block;}
+.hero-main .thumb{aspect-ratio:16/9;border-radius:var(--radius);overflow:hidden;margin-bottom:16px;}
+.hero-main h1{font-family:var(--font-display);font-size:clamp(28px,4vw,42px);line-height:1.12;font-weight:600;margin:0 0 12px;letter-spacing:-0.01em;}
+.hero-main p.summary{font-size:16px;color:var(--ink-soft);line-height:1.55;margin:0 0 12px;max-width:60ch;}
+.hero-side{display:flex;flex-direction:column;gap:18px;}
+.hero-side-item{display:grid;grid-template-columns:96px 1fr;gap:12px;padding-bottom:18px;border-bottom:1px solid var(--line);}
+.hero-side-item:last-child{border-bottom:none;}
+.hero-side-item .thumb{aspect-ratio:1/1;border-radius:var(--radius);overflow:hidden;}
+.hero-side-item h3{font-family:var(--font-display);font-size:16.5px;line-height:1.28;font-weight:600;margin:0 0 6px;}
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr;}
+}
+
+/* meta line */
+.meta{font-size:12.5px;color:var(--ink-faint);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.meta .cat-pill{font-weight:600;padding:2px 8px;border-radius:10px;font-size:11px;}
+.meta .sep{color:var(--line-strong);}
+
+/* ---------- Section header ---------- */
+.section{padding:34px 0;border-top:1px solid var(--line);}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+.section-head h2{font-family:var(--font-display);font-size:24px;font-weight:600;margin:0;display:flex;align-items:center;gap:10px;}
+.section-head .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.section-head .see-all{font-size:13px;color:var(--ink-soft);border-bottom:1px solid var(--line-strong);padding-bottom:1px;}
+.section-head .see-all:hover{color:var(--red);border-color:var(--red);}
+
+.row-scroll{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -20px;padding:0 20px 6px;scrollbar-width:thin;}
+@media (min-width:860px){
+  .row-scroll{overflow:visible;display:grid;grid-template-columns:repeat(4,1fr);margin:0;padding:0;}
+}
+.card{scroll-snap-align:start;flex:0 0 240px;}
+@media (min-width:860px){ .card{flex:none;} }
+.card .thumb{aspect-ratio:4/3;border-radius:var(--radius);overflow:hidden;margin-bottom:10px;}
+.card h3{font-family:var(--font-display);font-size:16.5px;line-height:1.3;font-weight:600;margin:0 0 6px;}
+.card p.dek{font-size:13.5px;color:var(--ink-soft);line-height:1.45;margin:0 0 6px;}
+
+/* thumb placeholder svg wrapper */
+.thumb{background:linear-gradient(135deg, var(--tc1), var(--tc2));display:flex;align-items:center;justify-content:center;}
+.thumb svg{width:38%;height:38%;color:rgba(255,255,255,0.92);}
+
+/* ---------- Footer ---------- */
+footer{background:var(--navy);color:#D9DCE4;margin-top:40px;}
+.footer-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:32px;padding:44px 0 28px;}
+.footer-grid h4{font-size:13px;text-transform:none;letter-spacing:0.02em;color:#8E9AB5;margin:0 0 14px;font-weight:600;}
+.footer-grid ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;}
+.footer-grid a{font-size:14px;color:#D9DCE4;}
+.footer-grid a:hover{color:#fff;text-decoration:underline;}
+.footer-brand .brand-mark{color:#F0DCB8;font-size:26px;}
+.footer-brand p{font-size:13.5px;color:#A7AFC2;line-height:1.6;max-width:32ch;margin:12px 0 0;}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.1);padding:16px 0;font-size:12.5px;color:#8E9AB5;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+@media (max-width:720px){ .footer-grid{grid-template-columns:1fr 1fr;} }
+
+/* ---------- Category page ---------- */
+.cat-header{padding:36px 0 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;}
+.cat-icon{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cat-icon svg{width:26px;height:26px;color:#fff;}
+.cat-header h1{font-family:var(--font-display);font-size:32px;margin:0 0 4px;font-weight:600;}
+.cat-header p{margin:0;color:var(--ink-soft);font-size:14px;}
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 22px;padding:28px 0;}
+@media (max-width:860px){ .cat-grid{grid-template-columns:1fr 1fr;} }
+@media (max-width:560px){ .cat-grid{grid-template-columns:1fr;} }
+.loadmore-wrap{text-align:center;padding:8px 0 30px;}
+.btn-outline{border:1px solid var(--line-strong);background:none;color:var(--ink);padding:11px 26px;border-radius:22px;font-size:13.5px;font-weight:500;}
+.btn-outline:hover{border-color:var(--ink);}
+
+/* ---------- Detail page ---------- */
+.article-page{padding:36px 0 20px;max-width:760px;margin:0 auto;}
+.article-page .cat-pill{display:inline-block;margin-bottom:14px;}
+.article-page h1{font-family:var(--font-display);font-size:clamp(30px,4.5vw,44px);line-height:1.12;font-weight:600;margin:0 0 16px;letter-spacing:-0.01em;}
+.article-page .lede{font-size:18px;color:var(--ink-soft);line-height:1.55;margin:0 0 18px;}
+.article-page .meta{margin-bottom:22px;}
+.article-hero-img{aspect-ratio:16/9;border-radius:var(--radius);overflow:hidden;margin-bottom:26px;}
+.article-body{font-family:var(--font-display);font-size:19px;line-height:1.7;color:var(--ink);}
+.article-body p{margin:0 0 20px;}
+.article-body p:first-of-type::first-letter{font-size:52px;line-height:0.85;float:left;padding:6px 8px 0 0;font-weight:600;color:var(--navy);}
+@media (prefers-color-scheme: dark){ .article-body p:first-of-type::first-letter{color:#E7CDA9;} }
+:root[data-theme="dark"] .article-body p:first-of-type::first-letter{color:#E7CDA9;}
+.share-row{display:flex;gap:10px;margin:26px 0 8px;padding-top:22px;border-top:1px solid var(--line);align-items:center;}
+.share-row span{font-size:13px;color:var(--ink-faint);}
+.share-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line-strong);display:flex;align-items:center;justify-content:center;background:none;color:var(--ink-soft);}
+.share-btn:hover{color:var(--red);border-color:var(--red);}
+.related-wrap{padding:34px 0 40px;border-top:1px solid var(--line);margin-top:20px;}
+.related-wrap h2{font-family:var(--font-display);font-size:21px;margin:0 0 16px;}
+.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+@media (max-width:720px){ .related-grid{grid-template-columns:1fr;} }
+
+/* ---------- Search ---------- */
+.search-page{padding:32px 0 40px;}
+.search-page h1{font-family:var(--font-display);font-size:26px;margin:0 0 4px;}
+.search-page .hint{color:var(--ink-soft);font-size:14px;margin:0 0 20px;}
+.search-field{display:flex;align-items:center;border:1px solid var(--line-strong);border-radius:24px;padding:10px 18px;gap:10px;max-width:480px;margin-bottom:26px;}
+.search-field input{border:none;outline:none;background:none;font-size:15px;width:100%;color:var(--ink);}
+.search-results{display:flex;flex-direction:column;gap:0;}
+.search-result{display:grid;grid-template-columns:110px 1fr;gap:16px;padding:18px 0;border-bottom:1px solid var(--line);}
+.search-result .thumb{aspect-ratio:1/1;border-radius:var(--radius);}
+.search-result h3{font-family:var(--font-display);font-size:17px;margin:0 0 6px;font-weight:600;}
+.search-result p{font-size:13.5px;color:var(--ink-soft);margin:0 0 6px;line-height:1.45;}
+.empty-state{padding:40px 0;text-align:center;color:var(--ink-faint);}
+.empty-state svg{width:44px;height:44px;margin:0 auto 14px;color:var(--line-strong);}
+
+/* ---------- Admin ---------- */
+.admin-shell{padding:30px 0 60px;}
+.admin-login{max-width:360px;margin:60px auto;text-align:center;}
+.admin-login h1{font-family:var(--font-display);font-size:26px;margin:0 0 6px;}
+.admin-login p.sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 26px;}
+.field{margin-bottom:14px;text-align:left;}
+.field label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;font-weight:500;}
+.field input,.field textarea,.field select{width:100%;padding:10px 12px;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--paper-raised);color:var(--ink);font-size:14px;}
+.field textarea{min-height:120px;resize:vertical;font-family:var(--font-body);line-height:1.5;}
+.btn-primary{background:var(--navy);color:#fff;border:none;padding:12px 22px;border-radius:var(--radius);font-size:14px;font-weight:600;width:100%;}
+.btn-primary:hover{background:var(--navy-soft);}
+.admin-note{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;font-size:12.5px;color:var(--ink-soft);margin-top:18px;text-align:left;line-height:1.5;}
+.login-error{color:var(--red);font-size:13px;margin-top:8px;display:none;}
+
+.admin-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.admin-top h1{font-family:var(--font-display);font-size:26px;margin:0;}
+.admin-top .right{display:flex;gap:10px;align-items:center;}
+.btn-ghost{background:none;border:1px solid var(--line-strong);padding:9px 16px;border-radius:var(--radius);font-size:13px;color:var(--ink);}
+.btn-ghost:hover{border-color:var(--ink);}
+.btn-solid-sm{background:var(--navy);color:#fff;border:none;padding:9px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;}
+.admin-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:28px;align-items:start;}
+@media (max-width:900px){ .admin-grid{grid-template-columns:1fr;} }
+.admin-panel{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
+.admin-panel h2{font-family:var(--font-display);font-size:18px;margin:0 0 16px;}
+.admin-list{display:flex;flex-direction:column;gap:0;max-height:640px;overflow-y:auto;}
+.admin-row{display:grid;grid-template-columns:50px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);}
+.admin-row .thumb{width:50px;height:50px;border-radius:var(--radius);aspect-ratio:auto;}
+.admin-row .info h4{margin:0 0 3px;font-size:14px;font-weight:600;}
+.admin-row .info span{font-size:12px;color:var(--ink-faint);}
+.admin-row .actions{display:flex;gap:6px;}
+.admin-row button{background:none;border:1px solid var(--line-strong);width:30px;height:30px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);}
+.admin-row button:hover{color:var(--red);border-color:var(--red);}
+.form-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 22px;border-radius:22px;font-size:13.5px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;z-index:200;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap masthead-top">
+    <div class="brand" data-nav="home">
+      <span class="brand-mark">Meridyen</span>
+      <span class="brand-tag" id="masthead-date"></span>
+    </div>
+    <div class="masthead-actions">
+      <div class="search-box" role="search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="quick-search" type="text" placeholder="Haber ara" aria-label="Haber ara">
+      </div>
+      <button class="icon-btn" aria-label="Ara" id="search-icon-btn">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="Yönetim paneli" data-nav="admin">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.2"/><path d="M4.5 20c1.5-4 4.2-6 7.5-6s6 2 7.5 6"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="catnav"><ul id="catnav-list"></ul></nav>
+</header>
+
+<div class="ticker" id="ticker-wrap">
+  <div class="ticker-inner">
+    <span class="ticker-label">Son dakika</span>
+    <div class="ticker-track" id="ticker-track"></div>
+  </div>
+</div>
+
+<main id="app" class="wrap"></main>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div class="footer-brand">
+      <span class="brand-mark">Meridyen</span>
+      <p>Gündemi doğrulanmış kaynaklarla, sade ve tarafsız bir dille aktaran bağımsız haber merkezi.</p>
+    </div>
+    <div>
+      <h4>Kategoriler</h4>
+      <ul id="footer-cats"></ul>
+    </div>
+    <div>
+      <h4>Kurumsal</h4>
+      <ul>
+        <li><a href="#/">Hakkımızda</a></li>
+        <li><a href="#/">Künye</a></li>
+        <li><a href="#/">İletişim</a></li>
+        <li><a href="#/">Reklam</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Bizi takip edin</h4>
+      <ul>
+        <li><a href="#/">X (Twitter)</a></li>
+        <li><a href="#/">Instagram</a></li>
+        <li><a href="#/">RSS</a></li>
+        <li><a href="#/admin">Yönetim paneli</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>© <span id="footer-year"></span> Meridyen Haber Merkezi. Tüm hakları saklıdır.</span>
+    <span>Bu bir tanıtım/geliştirme sürümüdür — içerikler örnek amaçlıdır.</span>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   MERİDYEN — Aşama 1: Veri modeli, ikonlar, yardımcılar
+   ========================================================= */
+
+const ICONS = {
+  gundem: '<path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1z"/><path d="M15 8a4 4 0 0 1 0 8"/><path d="M18 5a8 8 0 0 1 0 14"/>',
+  ekonomi: '<path d="M4 19h16"/><path d="M7 19V11"/><path d="M12 19V6"/><path d="M17 19v-8"/><path d="M4 9l5-4 4 3 6-5" fill="none"/>',
+  dunya: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><path d="M12 3.5c2.7 2.4 4.2 5.4 4.2 8.5s-1.5 6.1-4.2 8.5c-2.7-2.4-4.2-5.4-4.2-8.5S9.3 5.9 12 3.5z"/>',
+  spor: '<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M4.5 8h15M4.5 16h15"/>',
+  teknoloji: '<rect x="7" y="7" width="10" height="10" rx="1"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3M6 6l2 2M18 6l-2 2M6 18l2-2M18 18l-2-2"/>',
+  kultur: '<path d="M8 12a4 4 0 1 1-6 3.5c0-2 2-3 3-4.5"/><path d="M16 12a4 4 0 1 0 6 3.5c0-2-2-3-3-4.5"/><path d="M8 12c1-3 3-5 4-8 1 3 3 5 4 8"/>',
+  saglik: '<path d="M12 21s-7-4.4-9.5-9C.8 8.3 2.8 4.5 6.5 4.2 9 4 11 5.6 12 7c1-1.4 3-3 5.5-2.8 3.7.3 5.7 4.1 4 7.8-2.5 4.6-9.5 9-9.5 9z"/><path d="M6 12h3l1.5-3L12 15l1.5-3H18"/>'
+};
+
+const CATEGORIES = [
+  {slug:'gundem',     name:'Gündem',        icon:ICONS.gundem,    c1:'#C4443A', c2:'#8E2A22', desc:'Ülke gündemini şekillendiren en güncel gelişmeler.'},
+  {slug:'ekonomi',    name:'Ekonomi',       icon:ICONS.ekonomi,   c1:'#2E8A63', c2:'#1B5C41', desc:'Piyasalar, enflasyon ve iş dünyasından haberler.'},
+  {slug:'dunya',      name:'Dünya',         icon:ICONS.dunya,     c1:'#3E6FA6', c2:'#22456E', desc:'Küresel siyaset ve uluslararası gelişmeler.'},
+  {slug:'spor',       name:'Spor',          icon:ICONS.spor,      c1:'#C47A2E', c2:'#8E4E17', desc:'Lig, transfer ve müsabaka haberleri.'},
+  {slug:'teknoloji',  name:'Teknoloji',     icon:ICONS.teknoloji, c1:'#5C55A6', c2:'#392F73', desc:'Yapay zeka, donanım ve dijital dünyadan gelişmeler.'},
+  {slug:'kultur-sanat', name:'Kültür Sanat',icon:ICONS.kultur,    c1:'#A63E82', c2:'#742457', desc:'Sinema, edebiyat ve sanat dünyasından haberler.'},
+  {slug:'saglik',     name:'Sağlık',        icon:ICONS.saglik,    c1:'#2E9494', c2:'#1B6262', desc:'Tıp, beslenme ve yaşam sağlığı üzerine haberler.'}
+];
+const catBySlug = s => CATEGORIES.find(c=>c.slug===s);
+
+function paragraphs(arr){ return arr.map(p=>`<p>${p}</p>`).join(''); }
+
+// Örnek/yer tutucu haber verisi. Gerçek içerikler ilerleyen aşamada
+// veritabanından gelecek; şimdilik arayüzü test etmek için kullanılıyor.
+const SEED_ARTICLES = [
+ {id:'g1',cat:'gundem',featured:true,breaking:true,author:'Elif Sarpkaya',date:'2026-09-17',
+  title:'Meclis, yeni yerel yönetim paketini bu hafta görüşecek',
+  summary:'Komisyonlarda uzlaşıyla ilerleyen tasarı, belediyelerin bütçe planlama sürecine yeni bir takvim getiriyor.',
+  lede:'Tasarının genel kurula gelmesiyle birlikte yerel yönetimlerin 2027 bütçe hazırlıkları yeni bir sürece giriyor.',
+  body:['Meclis gündemine giren tasarı, belediyelerin yatırım bütçelerini üç yıllık dönemler halinde planlamasını öngörüyor. Komisyon üyeleri, düzenlemenin uzun vadeli projelerde öngörülebilirliği artıracağını belirtiyor.','Muhalefet kanadı ise denetim mekanizmalarının güçlendirilmesi gerektiğini savunarak birkaç maddeye itiraz etti. Görüşmelerin bu hafta içinde tamamlanması bekleniyor.','Yerel yönetim uzmanları, yeni takvimin küçük ölçekli belediyeler için uyum süreci gerektirebileceğini, bu nedenle geçiş dönemi desteklerinin önemli olduğunu vurguluyor.']},
+ {id:'g2',cat:'gundem',breaking:true,author:'Barış Coşkun',date:'2026-09-16',
+  title:'Şehir içi ulaşımda yeni kart sistemi pilot bölgelerde başladı',
+  summary:'Tek kartla tüm toplu taşıma araçlarını kapsayan sistem önce üç ilçede test edilecek.',
+  lede:'Ulaşım entegrasyonunu kolaylaştırması beklenen yeni sistem, kademeli olarak şehir geneline yayılacak.',
+  body:['Pilot uygulama kapsamında otobüs, metro ve vapur hatlarında tek kart geçerli olacak. Yetkililer, geçiş süresince eski kartların da kullanılabileceğini açıkladı.','İlk geri bildirimler yoğun saatlerde bekleme sürelerinin kısaldığı yönünde. Sistemin şehir geneline yayılması üç ay içinde planlanıyor.']},
+ {id:'g3',cat:'gundem',author:'Nazlı Ergun',date:'2026-09-15',
+  title:'Kuraklıkla mücadele için su tasarrufu eylem planı açıklandı',
+  summary:'Plan, tarımsal sulamadan konut kullanımına kadar kapsamlı tedbirler içeriyor.',
+  lede:'Azalan baraj doluluk oranları, yetkilileri yeni bir su tasarrufu takvimi hazırlamaya yöneltti.',
+  body:['Eylem planı kapsamında tarımsal sulamada damla sulama teşvikleri artırılacak, konutlarda ise kademeli tarife uygulaması gündemde. Uzmanlar, kısa vadeli önlemlerin yanında altyapı yatırımlarının da hızlandırılması gerektiğini söylüyor.','Belediyeler, park ve bahçe sulamasında arıtılmış su kullanımına geçişi hızlandıracaklarını duyurdu.']},
+ {id:'g4',cat:'gundem',author:'Deniz Aktaş',date:'2026-09-14',
+  title:'Okullarda dijital ders materyali dönemi resmen başladı',
+  summary:'Yeni eğitim yılıyla birlikte kâğıt ders kitaplarının yerini kademeli olarak tabletler alacak.',
+  lede:'Pilot illerde başlayan uygulamanın önümüzdeki iki yıl içinde ülke geneline yayılması planlanıyor.',
+  body:['Milli Eğitim yetkilileri, dijital materyallerin müfredatla senkronize güncellendiğini ve öğretmenlere ayrı bir eğitim programı sunulduğunu belirtti. Veli dernekleri ise ekran süresine ilişkin kaygılarını dile getirdi.','Pilot bölgelerdeki ilk değerlendirmeler, öğrencilerin etkileşimli içeriklere olumlu tepki verdiğini gösteriyor.']},
+
+ {id:'e1',cat:'ekonomi',featured:true,author:'Murat Pekcan',date:'2026-09-17',
+  title:'Merkez Bankası politika faizini sabit tuttu',
+  summary:'Karar metninde enflasyondaki yavaşlamanın sürmesi halinde gevşeme sinyali verildi.',
+  lede:'Piyasalar toplantı öncesinde faiz artışı beklemiyordu; karar büyük ölçüde beklentilerle uyumlu geldi.',
+  body:['Banka, enflasyonun çekirdek kalemlerdeki yavaşlamaya rağmen hedeften uzak olduğunu vurgulayarak temkinli duruşunu koruduğunu belirtti. Analistler, önümüzdeki toplantıda sınırlı bir indirim ihtimalinin masada olduğunu değerlendiriyor.','Karar sonrası döviz piyasalarında sınırlı bir hareket gözlendi. Borsa endeksi güne yatay bir seyirle başladı.']},
+ {id:'e2',cat:'ekonomi',breaking:true,author:'Selin Kaya',date:'2026-09-16',
+  title:'İmalat sanayinde istihdam üst üste üçüncü ayda arttı',
+  summary:'Sektör temsilcileri, ihracat siparişlerindeki toparlanmanın istihdama yansıdığını söylüyor.',
+  lede:'Veriler, özellikle otomotiv yan sanayinde belirgin bir canlanmaya işaret ediyor.',
+  body:['Sanayi odaları tarafından paylaşılan verilere göre, yeni sipariş girişleri son çeyrekte hız kazandı. Bu durum özellikle ihracat ağırlıklı bölgelerde yeni işe alımları tetikledi.','Ekonomistler, iyileşmenin kalıcı olması için hammadde maliyetlerindeki oynaklığın kontrol altında tutulması gerektiğini belirtiyor.']},
+ {id:'e3',cat:'ekonomi',author:'Tolga Baran',date:'2026-09-15',
+  title:'Küçük işletmelere yönelik yeni kredi paketi devreye girdi',
+  summary:'Düşük faizli paket, dijitalleşme ve enerji verimliliği yatırımlarını önceliklendiriyor.',
+  lede:'Başvurular bu hafta itibarıyla bankalar üzerinden alınmaya başlandı.',
+  body:['Paket kapsamında özellikle enerji verimliliğine yönelik ekipman yatırımlarına ayrı bir teşvik oranı uygulanacak. Yetkililer, başvuru sürecinin sadeleştirildiğini ve onay sürelerinin kısaltıldığını açıkladı.','Esnaf odaları, kredi limitlerinin bölgesel ihtiyaçlara göre güncellenmesini talep ediyor.']},
+ {id:'e4',cat:'ekonomi',author:'Aylin Su',date:'2026-09-13',
+  title:'Perakendede yılın son çeyreğine dair beklentiler yükseliyor',
+  summary:'Sektör raporları, indirim dönemlerinin tüketici talebini canlandırdığını gösteriyor.',
+  lede:'Zincir mağazalar, stok planlamasını yıl sonu kampanyalarına göre şimdiden şekillendiriyor.',
+  body:['Raporlara göre online alışveriş payı geçen yılın aynı dönemine kıyasla artış gösterdi. Perakendeciler, lojistik kapasitelerini yoğun döneme göre genişlettiklerini belirtiyor.']},
+
+ {id:'d1',cat:'dunya',featured:true,author:'Kerem Yıldız',date:'2026-09-17',
+  title:'İki komşu ülke sınır ticaretinde yeni anlaşmaya vardı',
+  summary:'Anlaşma, gümrük süreçlerini basitleştirerek karşılıklı ticaret hacmini artırmayı hedefliyor.',
+  lede:'Yıllardır süren müzakerelerin ardından imzalanan protokol, bölgesel ekonomiler için olumlu karşılandı.',
+  body:['Protokol kapsamında sınır kapılarındaki bekleme süreleri kısaltılacak ve ortak bir gümrük veri sistemi kurulacak. Taraflar, anlaşmanın altı ay içinde tam olarak yürürlüğe gireceğini açıkladı.','Bölgesel ekonomi uzmanları, adımın küçük ve orta ölçekli ihracatçılar için önemli fırsatlar yaratabileceğini belirtiyor.']},
+ {id:'d2',cat:'dunya',author:'Zeynep Aral',date:'2026-09-16',
+  title:'Uluslararası iklim zirvesinde finansman taahhüdü genişletildi',
+  summary:'Gelişmekte olan ülkelere yönelik destek fonunun kapsamı yeniden gözden geçirildi.',
+  lede:'Zirve sonuç bildirgesi, önceki taahhütlerin yetersiz kaldığı eleştirisi üzerine güncellendi.',
+  body:['Katılımcı ülkeler, fonun dağıtım kriterlerinin daha şeffaf hale getirilmesi konusunda uzlaştı. Sivil toplum örgütleri ise taahhütlerin denetim mekanizmasının hâlâ zayıf olduğunu savunuyor.']},
+ {id:'d3',cat:'dunya',author:'Onur Ateş',date:'2026-09-14',
+  title:'Bölgesel seçimlerde katılım oranı rekor kırdı',
+  summary:'Yüksek katılım, seçim sonuçlarının meşruiyeti açısından önemli bulunuyor.',
+  lede:'Gözlemciler, gençlerin oy kullanma oranındaki artışa dikkat çekiyor.',
+  body:['Seçim kurulu verilerine göre katılım oranı önceki döneme kıyasla belirgin şekilde arttı. Analistler bu artışı dijital kayıt sistemlerinin kolaylaştırılmasına bağlıyor.']},
+
+ {id:'s1',cat:'spor',featured:true,author:'Kaan Demirtaş',date:'2026-09-17',
+  title:'Ligde zirve yarışı son haftaya damgasını vurdu',
+  summary:'Puan farkının bir olduğu iki takım, sezonun belirleyici maçına çıkacak.',
+  lede:'Teknik direktörler, sakatlık durumlarının kadro planlamasını doğrudan etkilediğini açıkladı.',
+  body:['İki takımın da hazırlık antrenmanlarını kapalı kapılar ardında sürdürmesi merakı artırdı. Taraftar grupları, maç öncesi şehirde yoğun bir hareketlilik yaratıyor.','İstatistikler, son beş sezonda benzer averaj farkıyla giren takımların üçünün şampiyonluğa ulaştığını gösteriyor.']},
+ {id:'s2',cat:'spor',author:'Pınar Yalçın',date:'2026-09-16',
+  title:'Milli takım, hazırlık maçında rakibini farklı geçti',
+  summary:'Genç oyuncuların forma giydiği karşılaşmada teknik direktör memnuniyetini dile getirdi.',
+  lede:'Karşılaşma, önümüzdeki elemeler öncesi kadro derinliğini test etmek amacıyla planlanmıştı.',
+  body:['Maç boyunca rotasyona giden kadroda forma giyen genç oyuncular dikkat çekici performans sergiledi. Teknik heyet, elemeler öncesi son hazırlık maçını gelecek ay oynayacaklarını duyurdu.']},
+ {id:'s3',cat:'spor',author:'Ozan Fırat',date:'2026-09-13',
+  title:'Basketbolda transfer dönemi hareketli geçiyor',
+  summary:'Kulüpler, yeni sezon öncesi kadrolarını güçlendirmek için harekete geçti.',
+  lede:'Özellikle uzun oyuncu pozisyonunda yoğun bir rekabet yaşanıyor.',
+  body:['Kulüp yöneticileri, bütçe planlamasının sezon başına yetiştirilmesi için görüşmelerin hızlandığını belirtti. Taraftarlar sosyal medyada transfer gelişmelerini yakından takip ediyor.']},
+
+ {id:'t1',cat:'teknoloji',featured:true,breaking:true,author:'Sıla Erdem',date:'2026-09-17',
+  title:'Yerli işlemci tasarımında yeni nesil prototip tanıtıldı',
+  summary:'Enerji verimliliğine odaklanan çip, mobil cihazlarda test aşamasına geçti.',
+  lede:'Geliştirici ekip, seri üretime geçiş için yatırım görüşmelerinin sürdüğünü açıkladı.',
+  body:['Prototip, önceki nesle kıyasla güç tüketiminde belirgin bir azalma sağlıyor. Ekip, ilk test sonuçlarının beklenenden olumlu çıktığını belirtti.','Sektör temsilcileri, yerli çip geliştirme çabalarının tedarik zinciri bağımlılığını azaltmada kritik olduğunu vurguluyor.']},
+ {id:'t2',cat:'teknoloji',author:'Yiğit Can',date:'2026-09-15',
+  title:'Yapay zeka destekli tarım uygulaması küçük üreticilere ulaşıyor',
+  summary:'Uygulama, toprak verimliliği ve sulama zamanlaması konusunda öneriler sunuyor.',
+  lede:'Pilot bölgelerdeki üreticiler, verim artışının umut verici olduğunu belirtiyor.',
+  body:['Uygulama, uydu görüntüleri ve yerel hava durumu verilerini birleştirerek üreticilere kişiselleştirilmiş öneriler sunuyor. Geliştiriciler, önümüzdeki dönemde uygulamayı daha fazla bölgeye yaygınlaştırmayı planlıyor.']},
+ {id:'t3',cat:'teknoloji',author:'Ece Bulut',date:'2026-09-12',
+  title:'Siber güvenlikte yeni düzenleme kamu kurumlarını kapsıyor',
+  summary:'Düzenleme, kritik altyapı sistemlerinde asgari güvenlik standartlarını zorunlu kılıyor.',
+  lede:'Kurumlara uyum için altı aylık bir geçiş süresi tanındı.',
+  body:['Uzmanlar, düzenlemenin özellikle enerji ve su dağıtım sistemlerinde siber saldırılara karşı direnci artıracağını belirtiyor. Uygulamanın denetimi ilgili kurum tarafından yürütülecek.']},
+
+ {id:'k1',cat:'kultur-sanat',featured:true,author:'Mert Solak',date:'2026-09-16',
+  title:'Şehir müzesinde açılan sergi yoğun ilgi görüyor',
+  summary:'Yerel sanatçıların eserlerine yer veren sergi, bir ay boyunca ziyarete açık olacak.',
+  lede:'Küratörler, sergide geleneksel teknikleri çağdaş yorumlarla buluşturduklarını belirtiyor.',
+  body:['Sergi kapsamında yer alan atölye çalışmaları, ziyaretçilere sanat üretim sürecini yakından gözlemleme fırsatı sunuyor. Müze yönetimi, ilginin yoğunluğu nedeniyle sergi süresinin uzatılabileceğini açıkladı.']},
+ {id:'k2',cat:'kultur-sanat',author:'Gizem Tan',date:'2026-09-14',
+  title:'Bağımsız film festivali başvuruları başladı',
+  summary:'Festival bu yıl kısa film kategorisinde yeni bir ödül dalı ekliyor.',
+  lede:'Yönetmenler, festivalin genç sinemacılar için önemli bir platform olduğunu belirtiyor.',
+  body:['Festival organizasyon komitesi, başvuruların önümüzdeki ay sonuna kadar kabul edileceğini duyurdu. Seçici kurul, değerlendirmelerini iki aşamalı bir süreçle tamamlayacak.']},
+
+ {id:'h1',cat:'saglik',featured:true,author:'Derya Uçar',date:'2026-09-17',
+  title:'Uzmanlar mevsim geçişinde bağışıklık önerilerini paylaştı',
+  summary:'Düzenli uyku ve dengeli beslenmenin öne çıktığı öneriler arasında yer alıyor.',
+  lede:'Sağlık kuruluşları, mevsimsel hastalıklara karşı erken önlemlerin önemine dikkat çekiyor.',
+  body:['Uzmanlar, özellikle çocuklarda ve yaşlılarda bağışıklık desteğinin beslenme düzeniyle yakından ilişkili olduğunu vurguluyor. Düzenli fiziksel aktivitenin de koruyucu etkisi olduğu belirtiliyor.','Sağlık kuruluşları, mevsimsel aşı takviminin zamanında tamamlanmasını öneriyor.']},
+ {id:'h2',cat:'saglik',author:'Fatih Er',date:'2026-09-13',
+  title:'Uyku düzeninin kronik hastalık riskiyle ilişkisi araştırıldı',
+  summary:'Yeni araştırma, düzensiz uyku saatlerinin metabolik etkilerine dikkat çekiyor.',
+  lede:'Araştırmacılar, uyku düzeninin genel sağlık göstergeleriyle güçlü bir bağlantısı olduğunu belirtiyor.',
+  body:['Araştırma ekibi, uzun süreli düzensiz uyku alışkanlıklarının çeşitli metabolik göstergeler üzerinde olumsuz etkisi olabileceğini belirtti. Uzmanlar, düzenli uyku saatlerinin korunmasını öneriyor.']}
+];
+
+const STORAGE_KEY = 'meridyen_articles_v1';
+const AUTH_KEY = 'meridyen_admin_auth';
+
+function loadArticles(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_ARTICLES));
+  return SEED_ARTICLES.slice();
+}
+function saveArticles(list){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }catch(e){}
+}
+let ARTICLES = loadArticles();
+
+function fmtDate(iso){
+  const d = new Date(iso+'T00:00:00');
+  return d.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
+}
+function fmtDateShort(iso){
+  const d = new Date(iso+'T00:00:00');
+  return d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'});
+}
+
+function thumb(article, opts){
+  opts = opts||{};
+  const cat = catBySlug(article.cat);
+  const style = `--tc1:${cat.c1};--tc2:${cat.c2}`;
+  return `<div class="thumb" style="${style}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">${cat.icon}</svg></div>`;
+}
+function catPill(slug){
+  const c = catBySlug(slug);
+  return `<span class="cat-pill" style="background:${c.c1}22;color:${c.c1}">${c.name}</span>`;
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* =========================================================
+   Aşama 1 devamı: Yönlendirme (router) ve genel şablon
+   ========================================================= */
+
+function buildStaticNav(){
+  const list = document.getElementById('catnav-list');
+  list.innerHTML = `<li><a href="#/" class="home-link" data-slug="">Ana Sayfa</a></li>` +
+    CATEGORIES.map(c=>`<li><a href="#/kategori/${c.slug}" data-slug="${c.slug}">${c.name}</a></li>`).join('');
+
+  document.getElementById('footer-cats').innerHTML = CATEGORIES.map(c=>`<li><a href="#/kategori/${c.slug}">${c.name}</a></li>`).join('');
+  document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+  const d = new Date();
+  document.getElementById('masthead-date').textContent = d.toLocaleDateString('tr-TR',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+  document.querySelectorAll('[data-nav="home"]').forEach(el=>el.addEventListener('click',()=>{location.hash='#/';}));
+  document.querySelectorAll('[data-nav="admin"]').forEach(el=>el.addEventListener('click',()=>{location.hash='#/admin';}));
+
+  document.getElementById('search-icon-btn').addEventListener('click', ()=>{ location.hash = '#/arama'; });
+  const qs = document.getElementById('quick-search');
+  qs.addEventListener('keydown', e=>{
+    if(e.key==='Enter' && qs.value.trim()){ location.hash = '#/arama?q=' + encodeURIComponent(qs.value.trim()); }
+  });
+}
+
+function buildTicker(){
+  const breaking = ARTICLES.filter(a=>a.breaking);
+  const track = document.getElementById('ticker-track');
+  const wrap = document.getElementById('ticker-wrap');
+  if(!breaking.length){ wrap.style.display='none'; return; }
+  const items = breaking.map(a=>`<a href="#/haber/${a.id}">${a.title}</a>`);
+  track.innerHTML = items.concat(items).join('<span style="opacity:.5">&nbsp;&nbsp;•&nbsp;&nbsp;</span>');
+}
+
+function parseHash(){
+  let h = location.hash.replace(/^#/,'') || '/';
+  let [path, query] = h.split('?');
+  const parts = path.split('/').filter(Boolean);
+  const params = {};
+  if(query){ query.split('&').forEach(kv=>{ const [k,v] = kv.split('='); params[k]=decodeURIComponent(v||''); }); }
+  return {parts, params};
+}
+
+function setActiveNav(slug){
+  document.querySelectorAll('.catnav a').forEach(a=>{
+    a.classList.toggle('active', a.dataset.slug === (slug||''));
+  });
+}
+
+function render(){
+  const {parts, params} = parseHash();
+  window.scrollTo({top:0, behavior:'auto'});
+  if(parts[0]==='kategori' && parts[1]){
+    setActiveNav(parts[1]);
+    renderCategory(parts[1]);
+  } else if(parts[0]==='haber' && parts[1]){
+    setActiveNav(null);
+    renderArticle(parts[1]);
+  } else if(parts[0]==='arama'){
+    setActiveNav(null);
+    renderSearch(params.q||'');
+  } else if(parts[0]==='admin'){
+    setActiveNav(null);
+    renderAdmin();
+  } else {
+    setActiveNav('');
+    renderHome();
+  }
+}
+
+/* =========================================================
+   Aşama 2: Ana sayfa
+   ========================================================= */
+
+function renderHome(){
+  const app = document.getElementById('app');
+  const featured = ARTICLES.filter(a=>a.featured);
+  const main = featured[0] || ARTICLES[0];
+  const side = ARTICLES.filter(a=>a.id!==main.id).slice(0,3);
+
+  let html = `
+  <section class="hero">
+    <div class="hero-main">
+      <a class="card-link" href="#/haber/${main.id}">
+        ${thumb(main)}
+        <div class="meta">${catPill(main.cat)}<span class="sep">/</span><span>${main.author}</span><span class="sep">/</span><span>${fmtDateShort(main.date)}</span></div>
+        <h1>${main.title}</h1>
+        <p class="summary">${main.summary}</p>
+      </a>
+    </div>
+    <div class="hero-side">
+      ${side.map(a=>`
+        <div class="hero-side-item">
+          <a href="#/haber/${a.id}">${thumb(a)}</a>
+          <div>
+            <div class="meta" style="margin-bottom:5px;">${catPill(a.cat)}</div>
+            <a href="#/haber/${a.id}"><h3>${a.title}</h3></a>
+            <span style="font-size:12px;color:var(--ink-faint)">${fmtDateShort(a.date)}</span>
+          </div>
+        </div>`).join('')}
+    </div>
+  </section>`;
+
+  CATEGORIES.forEach(cat=>{
+    const items = ARTICLES.filter(a=>a.cat===cat.slug).slice(0,4);
+    if(!items.length) return;
+    html += `
+    <section class="section">
+      <div class="section-head">
+        <h2><span class="dot" style="background:${cat.c1}"></span>${cat.name}</h2>
+        <a class="see-all" href="#/kategori/${cat.slug}">Tümünü gör</a>
+      </div>
+      <div class="row-scroll">
+        ${items.map(a=>`
+          <a class="card card-link" href="#/haber/${a.id}">
+            ${thumb(a)}
+            <h3>${a.title}</h3>
+            <p class="dek">${a.summary}</p>
+            <span style="font-size:12px;color:var(--ink-faint)">${fmtDateShort(a.date)}</span>
+          </a>`).join('')}
+      </div>
+    </section>`;
+  });
+
+  app.innerHTML = html;
+}
+
+/* =========================================================
+   Aşama 3: Kategori sayfası
+   ========================================================= */
+
+function renderCategory(slug){
+  const app = document.getElementById('app');
+  const cat = catBySlug(slug);
+  if(!cat){ app.innerHTML = notFound('Kategori bulunamadı'); return; }
+  const items = ARTICLES.filter(a=>a.cat===slug).sort((a,b)=> b.date.localeCompare(a.date));
+
+  let visible = 6;
+  function draw(){
+    app.innerHTML = `
+    <div class="cat-header">
+      <div class="cat-icon" style="background:linear-gradient(135deg, ${cat.c1}, ${cat.c2})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${cat.icon}</svg>
+      </div>
+      <div>
+        <h1>${cat.name}</h1>
+        <p>${cat.desc}</p>
+      </div>
+    </div>
+    <div class="cat-grid">
+      ${items.slice(0,visible).map(a=>`
+        <a class="card card-link" href="#/haber/${a.id}">
+          ${thumb(a)}
+          <h3>${a.title}</h3>
+          <p class="dek">${a.summary}</p>
+          <div class="meta">${a.author}<span class="sep">/</span>${fmtDateShort(a.date)}</div>
+        </a>`).join('')}
+    </div>
+    ${visible < items.length ? `<div class="loadmore-wrap"><button class="btn-outline" id="loadmore">Daha fazla yükle</button></div>` : ''}
+    ${!items.length ? `<div class="empty-state"><p>Bu kategoride henüz haber yok.</p></div>` : ''}
+    `;
+    const btn = document.getElementById('loadmore');
+    if(btn) btn.addEventListener('click', ()=>{ visible += 6; draw(); });
+  }
+  draw();
+}
+
+/* =========================================================
+   Aşama 4: Haber detay sayfası
+   ========================================================= */
+
+function renderArticle(id){
+  const app = document.getElementById('app');
+  const a = ARTICLES.find(x=>x.id===id);
+  if(!a){ app.innerHTML = notFound('Haber bulunamadı'); return; }
+  const cat = catBySlug(a.cat);
+  const related = ARTICLES.filter(x=>x.cat===a.cat && x.id!==a.id).slice(0,3);
+
+  app.innerHTML = `
+  <article class="article-page">
+    ${catPill(a.cat)}
+    <h1>${a.title}</h1>
+    <p class="lede">${a.lede||a.summary}</p>
+    <div class="meta">
+      <strong style="color:var(--ink)">${a.author}</strong>
+      <span class="sep">/</span><span>${fmtDate(a.date)}</span>
+      <span class="sep">/</span><span>4 dk okuma</span>
+    </div>
+    <div class="article-hero-img" style="--tc1:${cat.c1};--tc2:${cat.c2}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="width:22%;height:22%;color:rgba(255,255,255,.92)">${cat.icon}</svg>
+    </div>
+    <div class="article-body">${paragraphs(a.body)}</div>
+    <div class="share-row">
+      <span>Paylaş</span>
+      <button class="share-btn" aria-label="Paylaş" title="Bağlantıyı kopyala" id="share-copy">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>
+      </button>
+    </div>
+  </article>
+  ${related.length ? `
+  <div class="related-wrap wrap">
+    <h2>${cat.name} kategorisinden diğer haberler</h2>
+    <div class="related-grid">
+      ${related.map(r=>`
+        <a class="card card-link" href="#/haber/${r.id}">
+          ${thumb(r)}
+          <h3>${r.title}</h3>
+          <span style="font-size:12px;color:var(--ink-faint)">${fmtDateShort(r.date)}</span>
+        </a>`).join('')}
+    </div>
+  </div>` : ''}
+  `;
+
+  document.getElementById('share-copy').addEventListener('click', ()=>{
+    toast('Bağlantı panoya kopyalandı (örnek)');
+  });
+}
+
+function notFound(msg){
+  return `<div class="empty-state" style="padding:80px 0;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <p>${msg}</p>
+    <a href="#/" class="btn-outline" style="display:inline-block;margin-top:10px;">Ana sayfaya dön</a>
+  </div>`;
+}
+
+/* =========================================================
+   Aşama 5: Arama sayfası
+   ========================================================= */
+
+function renderSearch(q){
+  const app = document.getElementById('app');
+  app.innerHTML = `
+  <div class="search-page">
+    <h1>Haber ara</h1>
+    <p class="hint">Başlık, özet veya kategoriye göre arayın.</p>
+    <div class="search-field">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search-input" type="text" placeholder="Örn. ekonomi, seçim, teknoloji..." value="${q.replace(/"/g,'&quot;')}">
+    </div>
+    <div id="search-results" class="search-results"></div>
+  </div>`;
+
+  const input = document.getElementById('search-input');
+  const resultsEl = document.getElementById('search-results');
+
+  function doSearch(term){
+    term = term.trim().toLowerCase();
+    if(!term){ resultsEl.innerHTML = `<div class="empty-state"><p>Aramaya başlamak için bir kelime yazın.</p></div>`; return; }
+    const results = ARTICLES.filter(a=>
+      a.title.toLowerCase().includes(term) ||
+      a.summary.toLowerCase().includes(term) ||
+      catBySlug(a.cat).name.toLowerCase().includes(term)
+    ).sort((a,b)=> b.date.localeCompare(a.date));
+
+    if(!results.length){
+      resultsEl.innerHTML = `<div class="empty-state"><p>“${term}” için sonuç bulunamadı.</p></div>`;
+      return;
+    }
+    resultsEl.innerHTML = results.map(a=>`
+      <a class="search-result card-link" href="#/haber/${a.id}">
+        ${thumb(a)}
+        <div>
+          <div class="meta" style="margin-bottom:5px;">${catPill(a.cat)}</div>
+          <h3>${a.title}</h3>
+          <p>${a.summary}</p>
+          <span style="font-size:12px;color:var(--ink-faint)">${a.author} · ${fmtDateShort(a.date)}</span>
+        </div>
+      </a>`).join('');
+  }
+
+  input.addEventListener('input', ()=>{ doSearch(input.value); history.replaceState(null,'', '#/arama?q='+encodeURIComponent(input.value)); });
+  doSearch(q);
+  input.focus();
+}
+
+/* =========================================================
+   Aşama 6: Admin paneli (frontend-only demo)
+   Not: Veritabanı bağlanana kadar veriler tarayıcıda
+   (localStorage) tutulur; bu sadece arayüzü göstermek içindir.
+   ========================================================= */
+
+function isAdminAuthed(){
+  return sessionStorage.getItem(AUTH_KEY) === '1';
+}
+
+function renderAdmin(){
+  const app = document.getElementById('app');
+  if(!isAdminAuthed()){ renderAdminLogin(); return; }
+  renderAdminDashboard();
+}
+
+function renderAdminLogin(){
+  const app = document.getElementById('app');
+  app.innerHTML = `
+  <div class="admin-shell">
+    <div class="admin-login">
+      <h1>Yönetim paneli</h1>
+      <p class="sub">İçerik ekibi için haber yönetim ekranı</p>
+      <form id="login-form">
+        <div class="field">
+          <label for="login-user">Kullanıcı adı</label>
+          <input id="login-user" type="text" autocomplete="username" placeholder="admin">
+        </div>
+        <div class="field">
+          <label for="login-pass">Parola</label>
+          <input id="login-pass" type="password" autocomplete="current-password" placeholder="••••••••">
+        </div>
+        <button class="btn-primary" type="submit">Giriş yap</button>
+        <p class="login-error" id="login-error">Kullanıcı adı veya parola hatalı.</p>
+      </form>
+      <div class="admin-note">
+        Demo girişi: <strong>admin</strong> / <strong>admin123</strong><br>
+        Bu, ön yüzü test etmek için geçici bir girişdir. Gerçek kimlik doğrulama, veritabanı ve API entegrasyonu ile birlikte bir sonraki aşamada eklenecek.
+      </div>
+    </div>
+  </div>`;
+
+  document.getElementById('login-form').addEventListener('submit', e=>{
+    e.preventDefault();
+    const u = document.getElementById('login-user').value.trim();
+    const p = document.getElementById('login-pass').value;
+    if(u==='admin' && p==='admin123'){
+      sessionStorage.setItem(AUTH_KEY,'1');
+      renderAdmin();
+    } else {
+      document.getElementById('login-error').style.display='block';
+    }
+  });
+}
+
+let editingId = null;
+
+function renderAdminDashboard(){
+  const app = document.getElementById('app');
+  app.innerHTML = `
+  <div class="admin-shell">
+    <div class="admin-top">
+      <h1>İçerik yönetimi</h1>
+      <div class="right">
+        <span style="font-size:12.5px;color:var(--ink-faint)">${ARTICLES.length} haber</span>
+        <button class="btn-ghost" id="logout-btn">Çıkış yap</button>
+      </div>
+    </div>
+    <div class="admin-grid">
+      <div class="admin-panel">
+        <h2 id="form-title">Yeni haber ekle</h2>
+        <form id="article-form">
+          <div class="field"><label for="f-title">Başlık</label><input id="f-title" required></div>
+          <div class="form-row2">
+            <div class="field"><label for="f-cat">Kategori</label>
+              <select id="f-cat">${CATEGORIES.map(c=>`<option value="${c.slug}">${c.name}</option>`).join('')}</select>
+            </div>
+            <div class="field"><label for="f-author">Yazar</label><input id="f-author" required></div>
+          </div>
+          <div class="field"><label for="f-summary">Özet</label><textarea id="f-summary" style="min-height:60px" required></textarea></div>
+          <div class="field"><label for="f-body">İçerik (paragrafları boş satırla ayırın)</label><textarea id="f-body" required></textarea></div>
+          <div class="form-row2">
+            <div class="field"><label><input type="checkbox" id="f-featured" style="width:auto;display:inline-block;margin-right:6px;">Öne çıkan</label></div>
+            <div class="field"><label><input type="checkbox" id="f-breaking" style="width:auto;display:inline-block;margin-right:6px;">Son dakika</label></div>
+          </div>
+          <button class="btn-primary" type="submit" id="submit-btn">Yayınla</button>
+        </form>
+        <div class="admin-note">İçerikler şu an tarayıcınızda saklanıyor (veritabanı bağlantısı henüz eklenmedi). Sayfayı bu cihaz/tarayıcıda tekrar açtığınızda değişiklikler korunur.</div>
+      </div>
+      <div class="admin-panel">
+        <h2>Tüm haberler</h2>
+        <div class="admin-list" id="admin-list"></div>
+      </div>
+    </div>
+  </div>`;
+
+  document.getElementById('logout-btn').addEventListener('click', ()=>{
+    sessionStorage.removeItem(AUTH_KEY);
+    location.hash = '#/admin';
+    render();
+  });
+
+  drawAdminList();
+  document.getElementById('article-form').addEventListener('submit', onAdminSubmit);
+}
+
+function drawAdminList(){
+  const list = document.getElementById('admin-list');
+  const sorted = ARTICLES.slice().sort((a,b)=> b.date.localeCompare(a.date));
+  list.innerHTML = sorted.map(a=>`
+    <div class="admin-row">
+      ${thumb(a)}
+      <div class="info">
+        <h4>${a.title}</h4>
+        <span>${catBySlug(a.cat).name} · ${fmtDateShort(a.date)}${a.breaking?' · Son dakika':''}</span>
+      </div>
+      <div class="actions">
+        <button data-edit="${a.id}" title="Düzenle" aria-label="Düzenle">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+        </button>
+        <button data-del="${a.id}" title="Sil" aria-label="Sil">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>
+        </button>
+      </div>
+    </div>`).join('');
+
+  list.querySelectorAll('[data-edit]').forEach(btn=>{
+    btn.addEventListener('click', ()=> loadArticleIntoForm(btn.dataset.edit));
+  });
+  list.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.dataset.del;
+      const a = ARTICLES.find(x=>x.id===id);
+      if(confirm(`"${a.title}" haberini silmek istediğinize emin misiniz?`)){
+        ARTICLES = ARTICLES.filter(x=>x.id!==id);
+        saveArticles(ARTICLES);
+        drawAdminList();
+        buildTicker();
+        toast('Haber silindi');
+        if(editingId===id){ editingId=null; resetForm(); }
+      }
+    });
+  });
+}
+
+function loadArticleIntoForm(id){
+  const a = ARTICLES.find(x=>x.id===id);
+  if(!a) return;
+  editingId = id;
+  document.getElementById('form-title').textContent = 'Haberi düzenle';
+  document.getElementById('f-title').value = a.title;
+  document.getElementById('f-cat').value = a.cat;
+  document.getElementById('f-author').value = a.author;
+  document.getElementById('f-summary').value = a.summary;
+  document.getElementById('f-body').value = a.body.join('\n\n');
+  document.getElementById('f-featured').checked = !!a.featured;
+  document.getElementById('f-breaking').checked = !!a.breaking;
+  document.getElementById('submit-btn').textContent = 'Güncelle';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function resetForm(){
+  const form = document.getElementById('article-form');
+  if(!form) return;
+  form.reset();
+  document.getElementById('form-title').textContent = 'Yeni haber ekle';
+  document.getElementById('submit-btn').textContent = 'Yayınla';
+}
+
+function onAdminSubmit(e){
+  e.preventDefault();
+  const title = document.getElementById('f-title').value.trim();
+  const cat = document.getElementById('f-cat').value;
+  const author = document.getElementById('f-author').value.trim();
+  const summary = document.getElementById('f-summary').value.trim();
+  const bodyText = document.getElementById('f-body').value.trim();
+  const featured = document.getElementById('f-featured').checked;
+  const breaking = document.getElementById('f-breaking').checked;
+  const body = bodyText.split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean);
+  const today = new Date().toISOString().slice(0,10);
+
+  if(editingId){
+    const idx = ARTICLES.findIndex(x=>x.id===editingId);
+    if(idx>-1){
+      ARTICLES[idx] = {...ARTICLES[idx], title, cat, author, summary, body, featured, breaking, lede:summary};
+    }
+    toast('Haber güncellendi');
+    editingId = null;
+  } else {
+    const id = 'u' + Date.now();
+    ARTICLES.unshift({id, cat, author, date:today, title, summary, lede:summary, body, featured, breaking});
+    toast('Haber yayınlandı');
+  }
+  saveArticles(ARTICLES);
+  resetForm();
+  drawAdminList();
+  buildTicker();
+}
+
+/* =========================================================
+   Başlat
+   ========================================================= */
+
+buildStaticNav();
+buildTicker();
+window.addEventListener('hashchange', render);
+render();
+</script>
+</body>
+</html>
