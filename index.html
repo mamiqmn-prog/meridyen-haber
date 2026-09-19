@@ -3,12 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Meridyen — gündemi doğrulanmış kaynaklarla, sade ve tarafsız bir dille aktaran bağımsız haber merkezi.">
 <title>Meridyen — Bağımsız Haber Merkezi</title>
+<script>
+/* Kayıtlı tema tercihini sayfa çizilmeden uygula (yanıp sönmeyi önler) */
+try{var __t=localStorage.getItem('meridyen_theme');if(__t==='light'||__t==='dark'){document.documentElement.setAttribute('data-theme',__t);}}catch(e){}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
+  color-scheme:light;
   --paper:#FAFAF6;
   --paper-raised:#FFFFFF;
   --ink:#181A1F;
@@ -16,6 +22,9 @@
   --ink-faint:#8A8F99;
   --navy:#14213D;
   --navy-soft:#26355C;
+  --brand:#14213D;
+  --btn-bg:#14213D;
+  --btn-fg:#FFFFFF;
   --red:#AE2820;
   --red-soft:#C9483F;
   --line:#DEDACD;
@@ -24,31 +33,40 @@
   --font-body:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --radius:2px;
 }
-:root:not([data-theme="light"]){
-  @media (prefers-color-scheme: dark){
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
     --paper:#15161A;
     --paper-raised:#1D1F25;
     --ink:#ECEBE6;
     --ink-soft:#B4B7BF;
-    --ink-faint:#797E88;
+    --ink-faint:#8B909A;
     --navy:#0E1626;
     --navy-soft:#1B2740;
+    --brand:#E7CDA9;
+    --btn-bg:#E7CDA9;
+    --btn-fg:#15161A;
     --line:#33353D;
     --line-strong:#43454E;
   }
 }
 :root[data-theme="dark"]{
+  color-scheme:dark;
   --paper:#15161A;
   --paper-raised:#1D1F25;
   --ink:#ECEBE6;
   --ink-soft:#B4B7BF;
-  --ink-faint:#797E88;
+  --ink-faint:#8B909A;
   --navy:#0E1626;
   --navy-soft:#1B2740;
+  --brand:#E7CDA9;
+  --btn-bg:#E7CDA9;
+  --btn-fg:#15161A;
   --line:#33353D;
   --line-strong:#43454E;
 }
 *{box-sizing:border-box;}
+[hidden]{display:none !important;}
 html,body{margin:0;padding:0;}
 body{
   background:var(--paper);
@@ -56,57 +74,73 @@ body{
   font-family:var(--font-body);
   -webkit-font-smoothing:antialiased;
   min-height:100vh;
+  overflow-x:clip;
 }
+main{min-height:60vh;}
 img,svg{max-width:100%;display:block;}
 a{color:inherit;text-decoration:none;}
 button{font-family:inherit;cursor:pointer;}
 input,textarea,select{font-family:inherit;}
-.wrap{max-width:1180px;margin:0 auto;padding:0 20px;}
+/* Yatay boşluk yalnızca padding-inline ile verilir; başka kurallar üzerine yazamaz */
+.wrap{max-width:1180px;margin-inline:auto;padding-inline:20px;}
 :focus-visible{outline:2px solid var(--red-soft);outline-offset:2px;}
 @media (prefers-reduced-motion: reduce){
-  *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;}
+  *{transition-duration:0.001ms !important;}
+  .ticker-track{animation:none !important;}
+  .ticker-viewport{overflow-x:auto;}
+  .tk-dup{display:none !important;}
 }
 
 /* ---------- Masthead ---------- */
 .masthead{border-bottom:1px solid var(--line);background:var(--paper);position:sticky;top:0;z-index:50;}
-.masthead-top{display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px;gap:16px;}
-.brand{display:flex;align-items:baseline;gap:10px;cursor:pointer;}
-.brand-mark{font-family:var(--font-display);font-style:italic;font-weight:600;font-size:30px;letter-spacing:-0.01em;color:var(--navy);}
-:root[data-theme="dark"] .brand-mark, :root:not([data-theme="light"]) .brand-mark{ }
-@media (prefers-color-scheme: dark){ .brand-mark{color:#E7CDA9;} }
-:root[data-theme="dark"] .brand-mark{color:#E7CDA9;}
+.masthead-top{display:flex;align-items:center;justify-content:space-between;padding-block:14px 10px;gap:16px;}
+.brand{display:flex;align-items:baseline;gap:10px;}
+.brand-mark{font-family:var(--font-display);font-style:italic;font-weight:600;font-size:30px;letter-spacing:-0.01em;color:var(--brand);}
 .brand-tag{font-size:12px;color:var(--ink-faint);border-left:1px solid var(--line-strong);padding-left:10px;display:none;}
-.masthead-date{font-size:13px;color:var(--ink-faint);}
-.masthead-actions{display:flex;align-items:center;gap:14px;}
+.masthead-actions{display:flex;align-items:center;gap:10px;}
 .icon-btn{background:none;border:none;padding:6px;color:var(--ink);display:flex;align-items:center;border-radius:var(--radius);}
 .icon-btn:hover{color:var(--red);}
 .search-box{display:flex;align-items:center;border:1px solid var(--line-strong);border-radius:20px;padding:6px 12px;gap:8px;max-width:220px;}
 .search-box input{border:none;background:none;outline:none;font-size:13px;width:100%;color:var(--ink);}
 .search-box svg{flex-shrink:0;color:var(--ink-faint);}
-.hamburger{display:none;}
-nav.catnav{border-top:1px solid var(--line);overflow-x:auto;scrollbar-width:none;}
-nav.catnav::-webkit-scrollbar{display:none;}
-nav.catnav ul{display:flex;list-style:none;margin:0;padding:0;gap:2px;white-space:nowrap;}
-nav.catnav a{display:block;padding:11px 14px;font-size:13.5px;font-weight:500;color:var(--ink-soft);border-bottom:2px solid transparent;}
-nav.catnav a:hover, nav.catnav a.active{color:var(--red);border-bottom-color:var(--red);}
-nav.catnav a.home-link{color:var(--navy);font-weight:600;}
-@media (prefers-color-scheme: dark){ nav.catnav a.home-link{color:#E7CDA9;} }
-:root[data-theme="dark"] nav.catnav a.home-link{color:#E7CDA9;}
+.search-icon-link{display:none;}
+.catnav{border-top:1px solid var(--line);}
+.catnav-scroll{overflow-x:auto;scrollbar-width:none;position:relative;padding-inline:6px;}
+.catnav-scroll::-webkit-scrollbar{display:none;}
+.catnav ul{display:flex;list-style:none;margin:0;padding:0;gap:2px;white-space:nowrap;}
+.catnav a{display:block;padding:11px 14px;font-size:13.5px;font-weight:500;color:var(--ink-soft);border-bottom:2px solid transparent;}
+.catnav a:hover, .catnav a.active{color:var(--red);border-bottom-color:var(--red);}
+.catnav a.home-link{color:var(--brand);font-weight:600;}
+.catnav a.home-link:hover, .catnav a.home-link.active{color:var(--red);}
 
+@media (min-width:721px){
+  .brand-tag{display:block;}
+}
 @media (max-width:720px){
-  .masthead-date{display:none;}
   .search-box{display:none;}
+  .search-icon-link{display:flex;}
 }
 
 /* ---------- Breaking ticker ---------- */
-.ticker{background:var(--red);color:#fff;overflow:hidden;position:relative;}
-.ticker-inner{display:flex;align-items:center;gap:24px;}
-.ticker-label{flex-shrink:0;background:rgba(0,0,0,0.18);padding:7px 14px;font-size:12px;font-weight:700;letter-spacing:0.02em;}
-.ticker-track{display:flex;gap:48px;white-space:nowrap;animation:ticker-scroll 32s linear infinite;padding:7px 0;font-size:13px;}
+.ticker{background:var(--red);color:#fff;overflow:hidden;}
+.ticker-inner{display:flex;align-items:stretch;}
+.ticker-label{flex-shrink:0;display:flex;align-items:center;background:#8E1F19;padding:7px 14px;font-size:12px;font-weight:700;letter-spacing:0.02em;position:relative;z-index:1;}
+.ticker-viewport{flex:1;min-width:0;overflow:hidden;}
+.ticker-track{display:flex;width:max-content;white-space:nowrap;animation:ticker-scroll 40s linear infinite;padding:7px 0;font-size:13px;}
 .ticker:hover .ticker-track{animation-play-state:paused;}
 @keyframes ticker-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
-.ticker-track a{opacity:0.95;}
-.ticker-track a:hover{text-decoration:underline;}
+.tk-item{display:inline-flex;align-items:center;}
+.tk-item a{opacity:0.95;}
+.tk-item a:hover{text-decoration:underline;}
+.tk-sep{margin:0 22px;opacity:.5;}
+
+/* ---------- Kategori rozeti ---------- */
+.cat-pill{
+  display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;line-height:1.5;
+  background:rgba(128,128,128,.16);color:var(--c);
+  background:color-mix(in srgb, var(--c) 14%, transparent);
+  color:color-mix(in srgb, var(--c) 68%, var(--ink));
+}
 
 /* ---------- Hero ---------- */
 .hero{display:grid;grid-template-columns:1.5fr 1fr;gap:28px;padding:32px 0 8px;}
@@ -116,31 +150,41 @@ nav.catnav a.home-link{color:var(--navy);font-weight:600;}
 .hero-main p.summary{font-size:16px;color:var(--ink-soft);line-height:1.55;margin:0 0 12px;max-width:60ch;}
 .hero-side{display:flex;flex-direction:column;gap:18px;}
 .hero-side-item{display:grid;grid-template-columns:96px 1fr;gap:12px;padding-bottom:18px;border-bottom:1px solid var(--line);}
+.hero-side-item > div{min-width:0;}
 .hero-side-item:last-child{border-bottom:none;}
 .hero-side-item .thumb{aspect-ratio:1/1;border-radius:var(--radius);overflow:hidden;}
 .hero-side-item h3{font-family:var(--font-display);font-size:16.5px;line-height:1.28;font-weight:600;margin:0 0 6px;}
 @media (max-width:860px){
   .hero{grid-template-columns:1fr;}
 }
+.card-link:hover h1, .card-link:hover h3, a:hover > h3{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;}
 
 /* meta line */
 .meta{font-size:12.5px;color:var(--ink-faint);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.meta .cat-pill{font-weight:600;padding:2px 8px;border-radius:10px;font-size:11px;}
 .meta .sep{color:var(--line-strong);}
 
 /* ---------- Section header ---------- */
-.section{padding:34px 0;border-top:1px solid var(--line);}
+.section{padding-block:34px;border-top:1px solid var(--line);}
 .section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
 .section-head h2{font-family:var(--font-display);font-size:24px;font-weight:600;margin:0;display:flex;align-items:center;gap:10px;}
 .section-head .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
 .section-head .see-all{font-size:13px;color:var(--ink-soft);border-bottom:1px solid var(--line-strong);padding-bottom:1px;}
 .section-head .see-all:hover{color:var(--red);border-color:var(--red);}
 
-.row-scroll{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -20px;padding:0 20px 6px;scrollbar-width:thin;}
+/* Yatay kaydırmalı kart satırı.
+   scroll-padding-inline: ilk kartın ekranın soluna yapışmasını (sola kayma) engeller. */
+.row-scroll{
+  display:flex;gap:18px;overflow-x:auto;
+  scroll-snap-type:x proximity;
+  margin-inline:-20px;padding:0 20px 6px;
+  scroll-padding-inline:20px;
+  scrollbar-width:none;
+}
+.row-scroll::-webkit-scrollbar{display:none;}
 @media (min-width:860px){
   .row-scroll{overflow:visible;display:grid;grid-template-columns:repeat(4,1fr);margin:0;padding:0;}
 }
-.card{scroll-snap-align:start;flex:0 0 240px;}
+.card{scroll-snap-align:start;flex:0 0 240px;min-width:0;}
 @media (min-width:860px){ .card{flex:none;} }
 .card .thumb{aspect-ratio:4/3;border-radius:var(--radius);overflow:hidden;margin-bottom:10px;}
 .card h3{font-family:var(--font-display);font-size:16.5px;line-height:1.3;font-weight:600;margin:0 0 6px;}
@@ -152,15 +196,16 @@ nav.catnav a.home-link{color:var(--navy);font-weight:600;}
 
 /* ---------- Footer ---------- */
 footer{background:var(--navy);color:#D9DCE4;margin-top:40px;}
-.footer-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:32px;padding:44px 0 28px;}
-.footer-grid h4{font-size:13px;text-transform:none;letter-spacing:0.02em;color:#8E9AB5;margin:0 0 14px;font-weight:600;}
+.footer-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:32px;padding-block:44px 28px;}
+.footer-grid h4{font-size:13px;letter-spacing:0.02em;color:#8E9AB5;margin:0 0 14px;font-weight:600;}
 .footer-grid ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;}
 .footer-grid a{font-size:14px;color:#D9DCE4;}
 .footer-grid a:hover{color:#fff;text-decoration:underline;}
 .footer-brand .brand-mark{color:#F0DCB8;font-size:26px;}
 .footer-brand p{font-size:13.5px;color:#A7AFC2;line-height:1.6;max-width:32ch;margin:12px 0 0;}
-.footer-bottom{border-top:1px solid rgba(255,255,255,0.1);padding:16px 0;font-size:12.5px;color:#8E9AB5;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
-@media (max-width:720px){ .footer-grid{grid-template-columns:1fr 1fr;} }
+.footer-bottom-wrap{border-top:1px solid rgba(255,255,255,0.1);}
+.footer-bottom{padding-block:16px;font-size:12.5px;color:#8E9AB5;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+@media (max-width:720px){ .footer-grid{grid-template-columns:1fr 1fr;gap:28px 20px;} }
 
 /* ---------- Category page ---------- */
 .cat-header{padding:36px 0 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;}
@@ -169,6 +214,7 @@ footer{background:var(--navy);color:#D9DCE4;margin-top:40px;}
 .cat-header h1{font-family:var(--font-display);font-size:32px;margin:0 0 4px;font-weight:600;}
 .cat-header p{margin:0;color:var(--ink-soft);font-size:14px;}
 .cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 22px;padding:28px 0;}
+.cat-grid .card{flex:none;}
 @media (max-width:860px){ .cat-grid{grid-template-columns:1fr 1fr;} }
 @media (max-width:560px){ .cat-grid{grid-template-columns:1fr;} }
 .loadmore-wrap{text-align:center;padding:8px 0 30px;}
@@ -177,16 +223,15 @@ footer{background:var(--navy);color:#D9DCE4;margin-top:40px;}
 
 /* ---------- Detail page ---------- */
 .article-page{padding:36px 0 20px;max-width:760px;margin:0 auto;}
-.article-page .cat-pill{display:inline-block;margin-bottom:14px;}
+.article-page .cat-pill{margin-bottom:14px;}
 .article-page h1{font-family:var(--font-display);font-size:clamp(30px,4.5vw,44px);line-height:1.12;font-weight:600;margin:0 0 16px;letter-spacing:-0.01em;}
 .article-page .lede{font-size:18px;color:var(--ink-soft);line-height:1.55;margin:0 0 18px;}
 .article-page .meta{margin-bottom:22px;}
 .article-hero-img{aspect-ratio:16/9;border-radius:var(--radius);overflow:hidden;margin-bottom:26px;}
+.article-hero-img svg{width:22%;height:22%;}
 .article-body{font-family:var(--font-display);font-size:19px;line-height:1.7;color:var(--ink);}
 .article-body p{margin:0 0 20px;}
-.article-body p:first-of-type::first-letter{font-size:52px;line-height:0.85;float:left;padding:6px 8px 0 0;font-weight:600;color:var(--navy);}
-@media (prefers-color-scheme: dark){ .article-body p:first-of-type::first-letter{color:#E7CDA9;} }
-:root[data-theme="dark"] .article-body p:first-of-type::first-letter{color:#E7CDA9;}
+.article-body p:first-of-type::first-letter{font-size:52px;line-height:0.85;float:left;padding:6px 8px 0 0;font-weight:600;color:var(--brand);}
 .share-row{display:flex;gap:10px;margin:26px 0 8px;padding-top:22px;border-top:1px solid var(--line);align-items:center;}
 .share-row span{font-size:13px;color:var(--ink-faint);}
 .share-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line-strong);display:flex;align-items:center;justify-content:center;background:none;color:var(--ink-soft);}
@@ -194,16 +239,19 @@ footer{background:var(--navy);color:#D9DCE4;margin-top:40px;}
 .related-wrap{padding:34px 0 40px;border-top:1px solid var(--line);margin-top:20px;}
 .related-wrap h2{font-family:var(--font-display);font-size:21px;margin:0 0 16px;}
 .related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.related-grid .card{flex:none;}
 @media (max-width:720px){ .related-grid{grid-template-columns:1fr;} }
 
 /* ---------- Search ---------- */
 .search-page{padding:32px 0 40px;}
 .search-page h1{font-family:var(--font-display);font-size:26px;margin:0 0 4px;}
 .search-page .hint{color:var(--ink-soft);font-size:14px;margin:0 0 20px;}
-.search-field{display:flex;align-items:center;border:1px solid var(--line-strong);border-radius:24px;padding:10px 18px;gap:10px;max-width:480px;margin-bottom:26px;}
-.search-field input{border:none;outline:none;background:none;font-size:15px;width:100%;color:var(--ink);}
+.search-field{display:flex;align-items:center;border:1px solid var(--line-strong);border-radius:24px;padding:10px 18px;gap:10px;max-width:480px;margin-bottom:14px;}
+.search-field input{border:none;outline:none;background:none;font-size:16px;width:100%;color:var(--ink);}
+.search-count{font-size:13px;color:var(--ink-faint);margin:0 0 6px;min-height:1em;}
 .search-results{display:flex;flex-direction:column;gap:0;}
 .search-result{display:grid;grid-template-columns:110px 1fr;gap:16px;padding:18px 0;border-bottom:1px solid var(--line);}
+.search-result > div{min-width:0;}
 .search-result .thumb{aspect-ratio:1/1;border-radius:var(--radius);}
 .search-result h3{font-family:var(--font-display);font-size:17px;margin:0 0 6px;font-weight:600;}
 .search-result p{font-size:13.5px;color:var(--ink-soft);margin:0 0 6px;line-height:1.45;}
@@ -217,19 +265,20 @@ footer{background:var(--navy);color:#D9DCE4;margin-top:40px;}
 .admin-login p.sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 26px;}
 .field{margin-bottom:14px;text-align:left;}
 .field label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;font-weight:500;}
-.field input,.field textarea,.field select{width:100%;padding:10px 12px;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--paper-raised);color:var(--ink);font-size:14px;}
+.field input,.field textarea,.field select{width:100%;padding:10px 12px;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--paper-raised);color:var(--ink);font-size:16px;}
 .field textarea{min-height:120px;resize:vertical;font-family:var(--font-body);line-height:1.5;}
-.btn-primary{background:var(--navy);color:#fff;border:none;padding:12px 22px;border-radius:var(--radius);font-size:14px;font-weight:600;width:100%;}
-.btn-primary:hover{background:var(--navy-soft);}
+.btn-primary{background:var(--btn-bg);color:var(--btn-fg);border:none;padding:12px 22px;border-radius:var(--radius);font-size:14px;font-weight:600;width:100%;}
+.btn-primary:hover{filter:brightness(1.12);}
 .admin-note{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;font-size:12.5px;color:var(--ink-soft);margin-top:18px;text-align:left;line-height:1.5;}
-.login-error{color:var(--red);font-size:13px;margin-top:8px;display:none;}
+.login-error{color:var(--red-soft);font-size:13px;margin-top:8px;}
 
 .admin-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
 .admin-top h1{font-family:var(--font-display);font-size:26px;margin:0;}
 .admin-top .right{display:flex;gap:10px;align-items:center;}
 .btn-ghost{background:none;border:1px solid var(--line-strong);padding:9px 16px;border-radius:var(--radius);font-size:13px;color:var(--ink);}
 .btn-ghost:hover{border-color:var(--ink);}
-.btn-solid-sm{background:var(--navy);color:#fff;border:none;padding:9px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;}
+.form-actions{display:flex;gap:10px;}
+.form-actions .btn-primary{flex:1;}
 .admin-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:28px;align-items:start;}
 @media (max-width:900px){ .admin-grid{grid-template-columns:1fr;} }
 .admin-panel{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
@@ -237,13 +286,14 @@ footer{background:var(--navy);color:#D9DCE4;margin-top:40px;}
 .admin-list{display:flex;flex-direction:column;gap:0;max-height:640px;overflow-y:auto;}
 .admin-row{display:grid;grid-template-columns:50px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);}
 .admin-row .thumb{width:50px;height:50px;border-radius:var(--radius);aspect-ratio:auto;}
+.admin-row .info{min-width:0;}
 .admin-row .info h4{margin:0 0 3px;font-size:14px;font-weight:600;}
 .admin-row .info span{font-size:12px;color:var(--ink-faint);}
 .admin-row .actions{display:flex;gap:6px;}
 .admin-row button{background:none;border:1px solid var(--line-strong);width:30px;height:30px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);}
 .admin-row button:hover{color:var(--red);border-color:var(--red);}
 .form-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 22px;border-radius:22px;font-size:13.5px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;z-index:200;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:12px 22px;border-radius:22px;font-size:13.5px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;z-index:200;max-width:calc(100% - 32px);text-align:center;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
 </style>
 </head>
@@ -251,30 +301,31 @@ footer{background:var(--navy);color:#D9DCE4;margin-top:40px;}
 
 <header class="masthead">
   <div class="wrap masthead-top">
-    <div class="brand" data-nav="home">
+    <a class="brand" href="#/" aria-label="Meridyen ana sayfa">
       <span class="brand-mark">Meridyen</span>
       <span class="brand-tag" id="masthead-date"></span>
-    </div>
+    </a>
     <div class="masthead-actions">
       <div class="search-box" role="search">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input id="quick-search" type="text" placeholder="Haber ara" aria-label="Haber ara">
+        <input id="quick-search" type="text" placeholder="Haber ara" aria-label="Haber ara" enterkeyhint="search">
       </div>
-      <button class="icon-btn" aria-label="Ara" id="search-icon-btn">
+      <a class="icon-btn search-icon-link" href="#/arama" aria-label="Ara">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </button>
-      <button class="icon-btn" aria-label="Yönetim paneli" data-nav="admin">
+      </a>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Temayı değiştir"></button>
+      <a class="icon-btn" href="#/admin" aria-label="Yönetim paneli">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.2"/><path d="M4.5 20c1.5-4 4.2-6 7.5-6s6 2 7.5 6"/></svg>
-      </button>
+      </a>
     </div>
   </div>
-  <nav class="catnav"><ul id="catnav-list"></ul></nav>
+  <nav class="catnav" aria-label="Kategoriler"><div class="wrap catnav-scroll" id="catnav-scroll"><ul id="catnav-list"></ul></div></nav>
 </header>
 
 <div class="ticker" id="ticker-wrap">
   <div class="ticker-inner">
     <span class="ticker-label">Son dakika</span>
-    <div class="ticker-track" id="ticker-track"></div>
+    <div class="ticker-viewport"><div class="ticker-track" id="ticker-track"></div></div>
   </div>
 </div>
 
@@ -293,33 +344,35 @@ footer{background:var(--navy);color:#D9DCE4;margin-top:40px;}
     <div>
       <h4>Kurumsal</h4>
       <ul>
-        <li><a href="#/">Hakkımızda</a></li>
-        <li><a href="#/">Künye</a></li>
-        <li><a href="#/">İletişim</a></li>
-        <li><a href="#/">Reklam</a></li>
+        <li><a href="#/sayfa/hakkimizda">Hakkımızda</a></li>
+        <li><a href="#/sayfa/kunye">Künye</a></li>
+        <li><a href="#/sayfa/iletisim">İletişim</a></li>
+        <li><a href="#/sayfa/reklam">Reklam</a></li>
       </ul>
     </div>
     <div>
       <h4>Bizi takip edin</h4>
       <ul>
-        <li><a href="#/">X (Twitter)</a></li>
-        <li><a href="#/">Instagram</a></li>
-        <li><a href="#/">RSS</a></li>
+        <li><a href="#/sayfa/yakinda">X (Twitter)</a></li>
+        <li><a href="#/sayfa/yakinda">Instagram</a></li>
+        <li><a href="#/sayfa/yakinda">RSS</a></li>
         <li><a href="#/admin">Yönetim paneli</a></li>
       </ul>
     </div>
   </div>
-  <div class="wrap footer-bottom">
-    <span>© <span id="footer-year"></span> Meridyen Haber Merkezi. Tüm hakları saklıdır.</span>
-    <span>Bu bir tanıtım/geliştirme sürümüdür — içerikler örnek amaçlıdır.</span>
+  <div class="footer-bottom-wrap">
+    <div class="wrap footer-bottom">
+      <span>© <span id="footer-year"></span> Meridyen Haber Merkezi. Tüm hakları saklıdır.</span>
+      <span>Bu bir tanıtım/geliştirme sürümüdür — içerikler örnek amaçlıdır.</span>
+    </div>
   </div>
 </footer>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 /* =========================================================
-   MERİDYEN — Aşama 1: Veri modeli, ikonlar, yardımcılar
+   MERİDYEN — Veri modeli, ikonlar, yardımcılar
    ========================================================= */
 
 const ICONS = {
@@ -342,8 +395,27 @@ const CATEGORIES = [
   {slug:'saglik',     name:'Sağlık',        icon:ICONS.saglik,    c1:'#2E9494', c2:'#1B6262', desc:'Tıp, beslenme ve yaşam sağlığı üzerine haberler.'}
 ];
 const catBySlug = s => CATEGORIES.find(c=>c.slug===s);
+const catSafe = s => catBySlug(s) || CATEGORIES[0];
 
-function paragraphs(arr){ return arr.map(p=>`<p>${p}</p>`).join(''); }
+const $ = id => document.getElementById(id);
+const byDateDesc = (a,b) => String(b.date).localeCompare(String(a.date));
+
+/* Kullanıcı/yönetici girdisini HTML'e basmadan önce kaçış (XSS koruması) */
+const ESC_MAP = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>ESC_MAP[c]); }
+
+function paragraphs(arr){ return (Array.isArray(arr)?arr:[]).map(p=>`<p>${esc(p)}</p>`).join(''); }
+
+/* Türkçe karakterleri sadeleştirip küçük harfe çevirir: "Seçim" ~ "secim" */
+function norm(s){
+  return String(s||'').toLocaleLowerCase('tr-TR')
+    .replace(/ı/g,'i').replace(/ş/g,'s').replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ö/g,'o').replace(/ü/g,'u')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+function safeGet(store, key){ try{ return store.getItem(key); }catch(e){ return null; } }
+function safeSet(store, key, val){ try{ store.setItem(key, val); }catch(e){} }
+function safeRemove(store, key){ try{ store.removeItem(key); }catch(e){} }
 
 // Örnek/yer tutucu haber verisi. Gerçek içerikler ilerleyen aşamada
 // veritabanından gelecek; şimdilik arayüzü test etmek için kullanılıyor.
@@ -461,147 +533,243 @@ const SEED_ARTICLES = [
   body:['Araştırma ekibi, uzun süreli düzensiz uyku alışkanlıklarının çeşitli metabolik göstergeler üzerinde olumsuz etkisi olabileceğini belirtti. Uzmanlar, düzenli uyku saatlerinin korunmasını öneriyor.']}
 ];
 
+const PAGES = {
+  hakkimizda:{title:'Hakkımızda', body:['Meridyen, gündemi doğrulanmış kaynaklarla, sade ve tarafsız bir dille aktarmayı hedefleyen bağımsız bir haber merkezidir.','Bu site şu an tanıtım/geliştirme sürümündedir; yayınlanan içerikler örnek amaçlıdır.']},
+  kunye:{title:'Künye', body:['Künye bilgileri, site yayına geçmeden önce bu sayfada yer alacaktır.']},
+  iletisim:{title:'İletişim', body:['İletişim bilgileri, site yayına geçmeden önce bu sayfada yer alacaktır.']},
+  reklam:{title:'Reklam', body:['Reklam ve iş birliği bilgileri, site yayına geçmeden önce bu sayfada yer alacaktır.']},
+  yakinda:{title:'Çok yakında', body:['Bu bağlantı henüz aktif değil. Çok yakında burada olacak.']}
+};
+
 const STORAGE_KEY = 'meridyen_articles_v1';
 const AUTH_KEY = 'meridyen_admin_auth';
+const THEME_KEY = 'meridyen_theme';
 
 function loadArticles(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw) return JSON.parse(raw);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed)) return parsed;
+    }
   }catch(e){}
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_ARTICLES));
+  safeSet(localStorage, STORAGE_KEY, JSON.stringify(SEED_ARTICLES));
   return SEED_ARTICLES.slice();
 }
-function saveArticles(list){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }catch(e){}
-}
+function saveArticles(list){ safeSet(localStorage, STORAGE_KEY, JSON.stringify(list)); }
 let ARTICLES = loadArticles();
 
 function fmtDate(iso){
   const d = new Date(iso+'T00:00:00');
-  return d.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
+  return isNaN(d) ? '' : d.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
 }
 function fmtDateShort(iso){
   const d = new Date(iso+'T00:00:00');
-  return d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'});
+  return isNaN(d) ? '' : d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'});
+}
+function todayISO(){
+  const d = new Date(), p = n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+}
+function readingMinutes(a){
+  const words = [a.lede||'', ...(Array.isArray(a.body)?a.body:[])].join(' ').split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words/200));
 }
 
-function thumb(article, opts){
-  opts = opts||{};
-  const cat = catBySlug(article.cat);
-  const style = `--tc1:${cat.c1};--tc2:${cat.c2}`;
-  return `<div class="thumb" style="${style}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">${cat.icon}</svg></div>`;
+function thumb(article){
+  const cat = catSafe(article.cat);
+  return `<div class="thumb" style="--tc1:${cat.c1};--tc2:${cat.c2}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${cat.icon}</svg></div>`;
 }
 function catPill(slug){
-  const c = catBySlug(slug);
-  return `<span class="cat-pill" style="background:${c.c1}22;color:${c.c1}">${c.name}</span>`;
+  const c = catSafe(slug);
+  return `<span class="cat-pill" style="--c:${c.c1}">${esc(c.name)}</span>`;
 }
 
 function toast(msg){
-  const t = document.getElementById('toast');
+  const t = $('toast');
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toast._t);
   toast._t = setTimeout(()=>t.classList.remove('show'), 2200);
 }
 
+function setTitle(part){
+  document.title = part ? `${part} — Meridyen` : 'Meridyen — Bağımsız Haber Merkezi';
+}
+
 /* =========================================================
-   Aşama 1 devamı: Yönlendirme (router) ve genel şablon
+   Tema (açık / koyu)
+   ========================================================= */
+
+const ICON_MOON = '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+const ICON_SUN  = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
+function currentTheme(){
+  const a = document.documentElement.getAttribute('data-theme');
+  if(a === 'light' || a === 'dark') return a;
+  return (darkQuery && darkQuery.matches) ? 'dark' : 'light';
+}
+function updateThemeIcon(){
+  const dark = currentTheme() === 'dark';
+  const btn = $('theme-toggle');
+  btn.innerHTML = `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${dark ? ICON_SUN : ICON_MOON}</svg>`;
+  btn.setAttribute('aria-label', dark ? 'Açık temaya geç' : 'Koyu temaya geç');
+}
+function initTheme(){
+  $('theme-toggle').addEventListener('click', ()=>{
+    const next = currentTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    safeSet(localStorage, THEME_KEY, next);
+    updateThemeIcon();
+  });
+  if(darkQuery && darkQuery.addEventListener){ darkQuery.addEventListener('change', updateThemeIcon); }
+  updateThemeIcon();
+}
+
+/* =========================================================
+   Genel şablon, gezinme ve yönlendirme (router)
    ========================================================= */
 
 function buildStaticNav(){
-  const list = document.getElementById('catnav-list');
-  list.innerHTML = `<li><a href="#/" class="home-link" data-slug="">Ana Sayfa</a></li>` +
-    CATEGORIES.map(c=>`<li><a href="#/kategori/${c.slug}" data-slug="${c.slug}">${c.name}</a></li>`).join('');
+  $('catnav-list').innerHTML = `<li><a href="#/" class="home-link" data-slug="">Ana Sayfa</a></li>` +
+    CATEGORIES.map(c=>`<li><a href="#/kategori/${c.slug}" data-slug="${c.slug}">${esc(c.name)}</a></li>`).join('');
 
-  document.getElementById('footer-cats').innerHTML = CATEGORIES.map(c=>`<li><a href="#/kategori/${c.slug}">${c.name}</a></li>`).join('');
-  document.getElementById('footer-year').textContent = new Date().getFullYear();
+  $('footer-cats').innerHTML = CATEGORIES.map(c=>`<li><a href="#/kategori/${c.slug}">${esc(c.name)}</a></li>`).join('');
+  $('footer-year').textContent = new Date().getFullYear();
+  $('masthead-date').textContent = new Date().toLocaleDateString('tr-TR',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
 
-  const d = new Date();
-  document.getElementById('masthead-date').textContent = d.toLocaleDateString('tr-TR',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
-
-  document.querySelectorAll('[data-nav="home"]').forEach(el=>el.addEventListener('click',()=>{location.hash='#/';}));
-  document.querySelectorAll('[data-nav="admin"]').forEach(el=>el.addEventListener('click',()=>{location.hash='#/admin';}));
-
-  document.getElementById('search-icon-btn').addEventListener('click', ()=>{ location.hash = '#/arama'; });
-  const qs = document.getElementById('quick-search');
+  const qs = $('quick-search');
   qs.addEventListener('keydown', e=>{
-    if(e.key==='Enter' && qs.value.trim()){ location.hash = '#/arama?q=' + encodeURIComponent(qs.value.trim()); }
+    if(e.key==='Enter' && qs.value.trim()){
+      location.hash = '#/arama?q=' + encodeURIComponent(qs.value.trim());
+      qs.value = '';
+      qs.blur();
+    }
   });
 }
 
 function buildTicker(){
-  const breaking = ARTICLES.filter(a=>a.breaking);
-  const track = document.getElementById('ticker-track');
-  const wrap = document.getElementById('ticker-wrap');
-  if(!breaking.length){ wrap.style.display='none'; return; }
-  const items = breaking.map(a=>`<a href="#/haber/${a.id}">${a.title}</a>`);
-  track.innerHTML = items.concat(items).join('<span style="opacity:.5">&nbsp;&nbsp;•&nbsp;&nbsp;</span>');
+  const wrap = $('ticker-wrap');
+  const track = $('ticker-track');
+  const breaking = ARTICLES.filter(a=>a.breaking).sort(byDateDesc).slice(0,8);
+  if(!breaking.length){ wrap.hidden = true; track.innerHTML = ''; return; }
+  wrap.hidden = false;
+
+  // Döngünün kesintisiz görünmesi için liste iki eşit yarıya bölünür;
+  // az haber varsa görünüm alanını dolduracak kadar tekrarlanır.
+  let half = breaking.slice();
+  while(half.length < 6) half = half.concat(breaking);
+  const full = half.concat(half);
+  track.innerHTML = full.map((a,i)=>{
+    const dup = i >= breaking.length;
+    return `<span class="tk-item${dup?' tk-dup':''}"${dup?' aria-hidden="true"':''}><a href="#/haber/${esc(a.id)}"${dup?' tabindex="-1"':''}>${esc(a.title)}</a><span class="tk-sep" aria-hidden="true">•</span></span>`;
+  }).join('');
+  track.style.animationDuration = Math.max(30, half.length*6) + 's';
 }
 
 function parseHash(){
-  let h = location.hash.replace(/^#/,'') || '/';
-  let [path, query] = h.split('?');
-  const parts = path.split('/').filter(Boolean);
+  const h = location.hash.replace(/^#/,'') || '/';
+  const qi = h.indexOf('?');
+  const path = qi>-1 ? h.slice(0,qi) : h;
+  const query = qi>-1 ? h.slice(qi+1) : '';
+  const parts = path.split('/').filter(Boolean).map(p=>{ try{ return decodeURIComponent(p); }catch(e){ return p; } });
   const params = {};
-  if(query){ query.split('&').forEach(kv=>{ const [k,v] = kv.split('='); params[k]=decodeURIComponent(v||''); }); }
+  if(query){
+    query.split('&').forEach(kv=>{
+      const i = kv.indexOf('=');
+      const k = i>-1 ? kv.slice(0,i) : kv;
+      const v = i>-1 ? kv.slice(i+1) : '';
+      try{ params[k] = decodeURIComponent(v.replace(/\+/g,' ')); }catch(e){ params[k] = v; }
+    });
+  }
   return {parts, params};
 }
 
 function setActiveNav(slug){
+  const scroller = $('catnav-scroll');
+  let active = null;
   document.querySelectorAll('.catnav a').forEach(a=>{
-    a.classList.toggle('active', a.dataset.slug === (slug||''));
+    const on = a.dataset.slug === (slug||'');
+    a.classList.toggle('active', on);
+    if(on) active = a;
   });
+  // Aktif sekme yatay menüde görünür kalsın
+  if(active && scroller){
+    scroller.scrollLeft = active.offsetLeft - (scroller.clientWidth - active.offsetWidth)/2;
+  }
 }
 
 function render(){
   const {parts, params} = parseHash();
   window.scrollTo({top:0, behavior:'auto'});
-  if(parts[0]==='kategori' && parts[1]){
-    setActiveNav(parts[1]);
-    renderCategory(parts[1]);
-  } else if(parts[0]==='haber' && parts[1]){
-    setActiveNav(null);
-    renderArticle(parts[1]);
-  } else if(parts[0]==='arama'){
-    setActiveNav(null);
-    renderSearch(params.q||'');
-  } else if(parts[0]==='admin'){
-    setActiveNav(null);
-    renderAdmin();
-  } else {
-    setActiveNav('');
-    renderHome();
+  try{
+    if(parts[0]==='kategori' && parts[1]){
+      setActiveNav(parts[1]);
+      renderCategory(parts[1]);
+    } else if(parts[0]==='haber' && parts[1]){
+      setActiveNav(null);
+      renderArticle(parts[1]);
+    } else if(parts[0]==='arama'){
+      setActiveNav(null);
+      renderSearch(params.q||'');
+    } else if(parts[0]==='sayfa' && parts[1]){
+      setActiveNav(null);
+      renderPage(parts[1]);
+    } else if(parts[0]==='admin'){
+      setActiveNav(null);
+      renderAdmin();
+    } else {
+      setActiveNav('');
+      renderHome();
+    }
+  }catch(err){
+    console.error(err);
+    setTitle('Hata');
+    $('app').innerHTML = notFound('Sayfa yüklenirken bir sorun oluştu.');
   }
 }
 
+function notFound(msg){
+  return `<div class="empty-state" style="padding:80px 0;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <p>${esc(msg)}</p>
+    <a href="#/" class="btn-outline" style="display:inline-block;margin-top:10px;">Ana sayfaya dön</a>
+  </div>`;
+}
+
 /* =========================================================
-   Aşama 2: Ana sayfa
+   Ana sayfa
    ========================================================= */
 
 function renderHome(){
-  const app = document.getElementById('app');
-  const featured = ARTICLES.filter(a=>a.featured);
-  const main = featured[0] || ARTICLES[0];
-  const side = ARTICLES.filter(a=>a.id!==main.id).slice(0,3);
+  setTitle('');
+  const app = $('app');
+  if(!ARTICLES.length){
+    app.innerHTML = `<div class="empty-state" style="padding:80px 0;"><p>Henüz yayınlanmış haber yok.</p></div>`;
+    return;
+  }
+  const sorted = ARTICLES.slice().sort(byDateDesc);
+  const main = sorted.find(a=>a.featured) || sorted[0];
+  const side = sorted.filter(a=>a.id!==main.id).slice(0,3);
 
   let html = `
   <section class="hero">
     <div class="hero-main">
-      <a class="card-link" href="#/haber/${main.id}">
+      <a class="card-link" href="#/haber/${esc(main.id)}">
         ${thumb(main)}
-        <div class="meta">${catPill(main.cat)}<span class="sep">/</span><span>${main.author}</span><span class="sep">/</span><span>${fmtDateShort(main.date)}</span></div>
-        <h1>${main.title}</h1>
-        <p class="summary">${main.summary}</p>
+        <div class="meta">${catPill(main.cat)}<span class="sep">/</span><span>${esc(main.author)}</span><span class="sep">/</span><span>${fmtDateShort(main.date)}</span></div>
+        <h1>${esc(main.title)}</h1>
+        <p class="summary">${esc(main.summary)}</p>
       </a>
     </div>
     <div class="hero-side">
       ${side.map(a=>`
         <div class="hero-side-item">
-          <a href="#/haber/${a.id}">${thumb(a)}</a>
+          <a href="#/haber/${esc(a.id)}" aria-hidden="true" tabindex="-1">${thumb(a)}</a>
           <div>
             <div class="meta" style="margin-bottom:5px;">${catPill(a.cat)}</div>
-            <a href="#/haber/${a.id}"><h3>${a.title}</h3></a>
+            <a href="#/haber/${esc(a.id)}"><h3>${esc(a.title)}</h3></a>
             <span style="font-size:12px;color:var(--ink-faint)">${fmtDateShort(a.date)}</span>
           </div>
         </div>`).join('')}
@@ -609,20 +777,20 @@ function renderHome(){
   </section>`;
 
   CATEGORIES.forEach(cat=>{
-    const items = ARTICLES.filter(a=>a.cat===cat.slug).slice(0,4);
+    const items = sorted.filter(a=>a.cat===cat.slug).slice(0,4);
     if(!items.length) return;
     html += `
     <section class="section">
       <div class="section-head">
-        <h2><span class="dot" style="background:${cat.c1}"></span>${cat.name}</h2>
+        <h2><span class="dot" style="background:${cat.c1}"></span>${esc(cat.name)}</h2>
         <a class="see-all" href="#/kategori/${cat.slug}">Tümünü gör</a>
       </div>
       <div class="row-scroll">
         ${items.map(a=>`
-          <a class="card card-link" href="#/haber/${a.id}">
+          <a class="card card-link" href="#/haber/${esc(a.id)}">
             ${thumb(a)}
-            <h3>${a.title}</h3>
-            <p class="dek">${a.summary}</p>
+            <h3>${esc(a.title)}</h3>
+            <p class="dek">${esc(a.summary)}</p>
             <span style="font-size:12px;color:var(--ink-faint)">${fmtDateShort(a.date)}</span>
           </a>`).join('')}
       </div>
@@ -633,173 +801,203 @@ function renderHome(){
 }
 
 /* =========================================================
-   Aşama 3: Kategori sayfası
+   Kategori sayfası
    ========================================================= */
 
 function renderCategory(slug){
-  const app = document.getElementById('app');
+  const app = $('app');
   const cat = catBySlug(slug);
-  if(!cat){ app.innerHTML = notFound('Kategori bulunamadı'); return; }
-  const items = ARTICLES.filter(a=>a.cat===slug).sort((a,b)=> b.date.localeCompare(a.date));
+  if(!cat){ setTitle('Bulunamadı'); app.innerHTML = notFound('Kategori bulunamadı.'); return; }
+  setTitle(cat.name);
+  const items = ARTICLES.filter(a=>a.cat===slug).sort(byDateDesc);
 
   let visible = 6;
   function draw(){
     app.innerHTML = `
     <div class="cat-header">
       <div class="cat-icon" style="background:linear-gradient(135deg, ${cat.c1}, ${cat.c2})">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${cat.icon}</svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${cat.icon}</svg>
       </div>
       <div>
-        <h1>${cat.name}</h1>
-        <p>${cat.desc}</p>
+        <h1>${esc(cat.name)}</h1>
+        <p>${esc(cat.desc)}</p>
       </div>
     </div>
     <div class="cat-grid">
       ${items.slice(0,visible).map(a=>`
-        <a class="card card-link" href="#/haber/${a.id}">
+        <a class="card card-link" href="#/haber/${esc(a.id)}">
           ${thumb(a)}
-          <h3>${a.title}</h3>
-          <p class="dek">${a.summary}</p>
-          <div class="meta">${a.author}<span class="sep">/</span>${fmtDateShort(a.date)}</div>
+          <h3>${esc(a.title)}</h3>
+          <p class="dek">${esc(a.summary)}</p>
+          <div class="meta">${esc(a.author)}<span class="sep">/</span>${fmtDateShort(a.date)}</div>
         </a>`).join('')}
     </div>
-    ${visible < items.length ? `<div class="loadmore-wrap"><button class="btn-outline" id="loadmore">Daha fazla yükle</button></div>` : ''}
+    ${visible < items.length ? `<div class="loadmore-wrap"><button class="btn-outline" id="loadmore" type="button">Daha fazla yükle</button></div>` : ''}
     ${!items.length ? `<div class="empty-state"><p>Bu kategoride henüz haber yok.</p></div>` : ''}
     `;
-    const btn = document.getElementById('loadmore');
+    const btn = $('loadmore');
     if(btn) btn.addEventListener('click', ()=>{ visible += 6; draw(); });
   }
   draw();
 }
 
 /* =========================================================
-   Aşama 4: Haber detay sayfası
+   Haber detay sayfası
    ========================================================= */
 
 function renderArticle(id){
-  const app = document.getElementById('app');
+  const app = $('app');
   const a = ARTICLES.find(x=>x.id===id);
-  if(!a){ app.innerHTML = notFound('Haber bulunamadı'); return; }
-  const cat = catBySlug(a.cat);
-  const related = ARTICLES.filter(x=>x.cat===a.cat && x.id!==a.id).slice(0,3);
+  if(!a){ setTitle('Bulunamadı'); app.innerHTML = notFound('Haber bulunamadı.'); return; }
+  setTitle(a.title);
+  const cat = catSafe(a.cat);
+  const related = ARTICLES.filter(x=>x.cat===a.cat && x.id!==a.id).sort(byDateDesc).slice(0,3);
 
   app.innerHTML = `
   <article class="article-page">
     ${catPill(a.cat)}
-    <h1>${a.title}</h1>
-    <p class="lede">${a.lede||a.summary}</p>
+    <h1>${esc(a.title)}</h1>
+    <p class="lede">${esc(a.lede||a.summary)}</p>
     <div class="meta">
-      <strong style="color:var(--ink)">${a.author}</strong>
+      <strong style="color:var(--ink)">${esc(a.author)}</strong>
       <span class="sep">/</span><span>${fmtDate(a.date)}</span>
-      <span class="sep">/</span><span>4 dk okuma</span>
+      <span class="sep">/</span><span>${readingMinutes(a)} dk okuma</span>
     </div>
-    <div class="article-hero-img" style="--tc1:${cat.c1};--tc2:${cat.c2}">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="width:22%;height:22%;color:rgba(255,255,255,.92)">${cat.icon}</svg>
+    <div class="thumb article-hero-img" style="--tc1:${cat.c1};--tc2:${cat.c2}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${cat.icon}</svg>
     </div>
     <div class="article-body">${paragraphs(a.body)}</div>
     <div class="share-row">
       <span>Paylaş</span>
-      <button class="share-btn" aria-label="Paylaş" title="Bağlantıyı kopyala" id="share-copy">
+      <button class="share-btn" type="button" aria-label="Bağlantıyı paylaş veya kopyala" title="Paylaş / bağlantıyı kopyala" id="share-copy">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>
       </button>
     </div>
   </article>
   ${related.length ? `
-  <div class="related-wrap wrap">
-    <h2>${cat.name} kategorisinden diğer haberler</h2>
+  <div class="related-wrap">
+    <h2>${esc(cat.name)} kategorisinden diğer haberler</h2>
     <div class="related-grid">
       ${related.map(r=>`
-        <a class="card card-link" href="#/haber/${r.id}">
+        <a class="card card-link" href="#/haber/${esc(r.id)}">
           ${thumb(r)}
-          <h3>${r.title}</h3>
+          <h3>${esc(r.title)}</h3>
           <span style="font-size:12px;color:var(--ink-faint)">${fmtDateShort(r.date)}</span>
         </a>`).join('')}
     </div>
   </div>` : ''}
   `;
 
-  document.getElementById('share-copy').addEventListener('click', ()=>{
-    toast('Bağlantı panoya kopyalandı (örnek)');
+  $('share-copy').addEventListener('click', async ()=>{
+    const url = location.href;
+    if(navigator.share){
+      try{ await navigator.share({title:a.title, url}); return; }
+      catch(e){ if(e && e.name==='AbortError') return; }
+    }
+    try{
+      await navigator.clipboard.writeText(url);
+      toast('Bağlantı panoya kopyalandı');
+    }catch(e){
+      toast('Bağlantı kopyalanamadı');
+    }
   });
 }
 
-function notFound(msg){
-  return `<div class="empty-state" style="padding:80px 0;">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <p>${msg}</p>
-    <a href="#/" class="btn-outline" style="display:inline-block;margin-top:10px;">Ana sayfaya dön</a>
-  </div>`;
+/* =========================================================
+   Kurumsal / statik sayfalar
+   ========================================================= */
+
+function renderPage(slug){
+  const p = PAGES[slug];
+  if(!p){ setTitle('Bulunamadı'); $('app').innerHTML = notFound('Sayfa bulunamadı.'); return; }
+  setTitle(p.title);
+  $('app').innerHTML = `
+  <article class="article-page">
+    <h1>${esc(p.title)}</h1>
+    <div class="article-body">${paragraphs(p.body)}</div>
+  </article>`;
 }
 
 /* =========================================================
-   Aşama 5: Arama sayfası
+   Arama sayfası
    ========================================================= */
 
 function renderSearch(q){
-  const app = document.getElementById('app');
+  setTitle('Arama');
+  const app = $('app');
   app.innerHTML = `
   <div class="search-page">
     <h1>Haber ara</h1>
-    <p class="hint">Başlık, özet veya kategoriye göre arayın.</p>
-    <div class="search-field">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="search-input" type="text" placeholder="Örn. ekonomi, seçim, teknoloji..." value="${q.replace(/"/g,'&quot;')}">
+    <p class="hint">Başlık, özet, yazar veya kategoriye göre arayın. Türkçe karakter yazmanız gerekmez.</p>
+    <div class="search-field" role="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search-input" type="text" inputmode="search" enterkeyhint="search" aria-label="Haber ara" placeholder="Örn. ekonomi, seçim, teknoloji..." value="${esc(q)}">
     </div>
+    <p class="search-count" id="search-count"></p>
     <div id="search-results" class="search-results"></div>
   </div>`;
 
-  const input = document.getElementById('search-input');
-  const resultsEl = document.getElementById('search-results');
+  const input = $('search-input');
+  const resultsEl = $('search-results');
+  const countEl = $('search-count');
 
-  function doSearch(term){
-    term = term.trim().toLowerCase();
-    if(!term){ resultsEl.innerHTML = `<div class="empty-state"><p>Aramaya başlamak için bir kelime yazın.</p></div>`; return; }
-    const results = ARTICLES.filter(a=>
-      a.title.toLowerCase().includes(term) ||
-      a.summary.toLowerCase().includes(term) ||
-      catBySlug(a.cat).name.toLowerCase().includes(term)
-    ).sort((a,b)=> b.date.localeCompare(a.date));
-
-    if(!results.length){
-      resultsEl.innerHTML = `<div class="empty-state"><p>“${term}” için sonuç bulunamadı.</p></div>`;
+  function doSearch(raw){
+    const term = raw.trim();
+    const terms = norm(term).split(/\s+/).filter(Boolean);
+    if(!terms.length){
+      countEl.textContent = '';
+      resultsEl.innerHTML = `<div class="empty-state"><p>Aramaya başlamak için bir kelime yazın.</p></div>`;
       return;
     }
+    const results = ARTICLES.filter(a=>{
+      const hay = norm([a.title, a.summary, a.author, catSafe(a.cat).name, (a.body||[]).join(' ')].join(' '));
+      return terms.every(t=>hay.includes(t));
+    }).sort(byDateDesc);
+
+    if(!results.length){
+      countEl.textContent = '';
+      resultsEl.innerHTML = `<div class="empty-state"><p>“${esc(term)}” için sonuç bulunamadı.</p></div>`;
+      return;
+    }
+    countEl.textContent = `${results.length} sonuç`;
     resultsEl.innerHTML = results.map(a=>`
-      <a class="search-result card-link" href="#/haber/${a.id}">
+      <a class="search-result card-link" href="#/haber/${esc(a.id)}">
         ${thumb(a)}
         <div>
           <div class="meta" style="margin-bottom:5px;">${catPill(a.cat)}</div>
-          <h3>${a.title}</h3>
-          <p>${a.summary}</p>
-          <span style="font-size:12px;color:var(--ink-faint)">${a.author} · ${fmtDateShort(a.date)}</span>
+          <h3>${esc(a.title)}</h3>
+          <p>${esc(a.summary)}</p>
+          <span style="font-size:12px;color:var(--ink-faint)">${esc(a.author)} · ${fmtDateShort(a.date)}</span>
         </div>
       </a>`).join('');
   }
 
-  input.addEventListener('input', ()=>{ doSearch(input.value); history.replaceState(null,'', '#/arama?q='+encodeURIComponent(input.value)); });
+  input.addEventListener('input', ()=>{
+    doSearch(input.value);
+    history.replaceState(null,'', '#/arama?q='+encodeURIComponent(input.value));
+  });
   doSearch(q);
-  input.focus();
+  if(!q) input.focus();
 }
 
 /* =========================================================
-   Aşama 6: Admin paneli (frontend-only demo)
+   Admin paneli (yalnızca ön yüz demosu)
    Not: Veritabanı bağlanana kadar veriler tarayıcıda
    (localStorage) tutulur; bu sadece arayüzü göstermek içindir.
    ========================================================= */
 
 function isAdminAuthed(){
-  return sessionStorage.getItem(AUTH_KEY) === '1';
+  return safeGet(sessionStorage, AUTH_KEY) === '1';
 }
 
 function renderAdmin(){
-  const app = document.getElementById('app');
+  setTitle('Yönetim paneli');
   if(!isAdminAuthed()){ renderAdminLogin(); return; }
   renderAdminDashboard();
 }
 
 function renderAdminLogin(){
-  const app = document.getElementById('app');
-  app.innerHTML = `
+  $('app').innerHTML = `
   <div class="admin-shell">
     <div class="admin-login">
       <h1>Yönetim paneli</h1>
@@ -814,24 +1012,24 @@ function renderAdminLogin(){
           <input id="login-pass" type="password" autocomplete="current-password" placeholder="••••••••">
         </div>
         <button class="btn-primary" type="submit">Giriş yap</button>
-        <p class="login-error" id="login-error">Kullanıcı adı veya parola hatalı.</p>
+        <p class="login-error" id="login-error" hidden>Kullanıcı adı veya parola hatalı.</p>
       </form>
       <div class="admin-note">
         Demo girişi: <strong>admin</strong> / <strong>admin123</strong><br>
-        Bu, ön yüzü test etmek için geçici bir girişdir. Gerçek kimlik doğrulama, veritabanı ve API entegrasyonu ile birlikte bir sonraki aşamada eklenecek.
+        Bu, ön yüzü test etmek için geçici bir girişidir. Gerçek kimlik doğrulama, veritabanı ve API entegrasyonu bir sonraki aşamada eklenecek.
       </div>
     </div>
   </div>`;
 
-  document.getElementById('login-form').addEventListener('submit', e=>{
+  $('login-form').addEventListener('submit', e=>{
     e.preventDefault();
-    const u = document.getElementById('login-user').value.trim();
-    const p = document.getElementById('login-pass').value;
+    const u = $('login-user').value.trim();
+    const p = $('login-pass').value;
     if(u==='admin' && p==='admin123'){
-      sessionStorage.setItem(AUTH_KEY,'1');
+      safeSet(sessionStorage, AUTH_KEY, '1');
       renderAdmin();
     } else {
-      document.getElementById('login-error').style.display='block';
+      $('login-error').hidden = false;
     }
   });
 }
@@ -839,14 +1037,14 @@ function renderAdminLogin(){
 let editingId = null;
 
 function renderAdminDashboard(){
-  const app = document.getElementById('app');
-  app.innerHTML = `
+  editingId = null; // Sayfa yeniden çizildiğinde eski düzenleme durumu kalmasın
+  $('app').innerHTML = `
   <div class="admin-shell">
     <div class="admin-top">
       <h1>İçerik yönetimi</h1>
       <div class="right">
-        <span style="font-size:12.5px;color:var(--ink-faint)">${ARTICLES.length} haber</span>
-        <button class="btn-ghost" id="logout-btn">Çıkış yap</button>
+        <span style="font-size:12.5px;color:var(--ink-faint)" id="admin-count"></span>
+        <button class="btn-ghost" id="logout-btn" type="button">Çıkış yap</button>
       </div>
     </div>
     <div class="admin-grid">
@@ -856,7 +1054,7 @@ function renderAdminDashboard(){
           <div class="field"><label for="f-title">Başlık</label><input id="f-title" required></div>
           <div class="form-row2">
             <div class="field"><label for="f-cat">Kategori</label>
-              <select id="f-cat">${CATEGORIES.map(c=>`<option value="${c.slug}">${c.name}</option>`).join('')}</select>
+              <select id="f-cat">${CATEGORIES.map(c=>`<option value="${c.slug}">${esc(c.name)}</option>`).join('')}</select>
             </div>
             <div class="field"><label for="f-author">Yazar</label><input id="f-author" required></div>
           </div>
@@ -866,7 +1064,10 @@ function renderAdminDashboard(){
             <div class="field"><label><input type="checkbox" id="f-featured" style="width:auto;display:inline-block;margin-right:6px;">Öne çıkan</label></div>
             <div class="field"><label><input type="checkbox" id="f-breaking" style="width:auto;display:inline-block;margin-right:6px;">Son dakika</label></div>
           </div>
-          <button class="btn-primary" type="submit" id="submit-btn">Yayınla</button>
+          <div class="form-actions">
+            <button class="btn-primary" type="submit" id="submit-btn">Yayınla</button>
+            <button class="btn-ghost" type="button" id="cancel-edit" hidden>Vazgeç</button>
+          </div>
         </form>
         <div class="admin-note">İçerikler şu an tarayıcınızda saklanıyor (veritabanı bağlantısı henüz eklenmedi). Sayfayı bu cihaz/tarayıcıda tekrar açtığınızda değişiklikler korunur.</div>
       </div>
@@ -877,35 +1078,39 @@ function renderAdminDashboard(){
     </div>
   </div>`;
 
-  document.getElementById('logout-btn').addEventListener('click', ()=>{
-    sessionStorage.removeItem(AUTH_KEY);
-    location.hash = '#/admin';
-    render();
+  $('logout-btn').addEventListener('click', ()=>{
+    safeRemove(sessionStorage, AUTH_KEY);
+    renderAdmin();
   });
+  $('cancel-edit').addEventListener('click', resetForm);
 
   drawAdminList();
-  document.getElementById('article-form').addEventListener('submit', onAdminSubmit);
+  $('article-form').addEventListener('submit', onAdminSubmit);
 }
 
 function drawAdminList(){
-  const list = document.getElementById('admin-list');
-  const sorted = ARTICLES.slice().sort((a,b)=> b.date.localeCompare(a.date));
-  list.innerHTML = sorted.map(a=>`
+  const list = $('admin-list');
+  if(!list) return;
+  const count = $('admin-count');
+  if(count) count.textContent = `${ARTICLES.length} haber`;
+
+  const sorted = ARTICLES.slice().sort(byDateDesc);
+  list.innerHTML = sorted.length ? sorted.map(a=>`
     <div class="admin-row">
       ${thumb(a)}
       <div class="info">
-        <h4>${a.title}</h4>
-        <span>${catBySlug(a.cat).name} · ${fmtDateShort(a.date)}${a.breaking?' · Son dakika':''}</span>
+        <h4>${esc(a.title)}</h4>
+        <span>${esc(catSafe(a.cat).name)} · ${fmtDateShort(a.date)}${a.breaking?' · Son dakika':''}</span>
       </div>
       <div class="actions">
-        <button data-edit="${a.id}" title="Düzenle" aria-label="Düzenle">
+        <button type="button" data-edit="${esc(a.id)}" title="Düzenle" aria-label="Düzenle">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
         </button>
-        <button data-del="${a.id}" title="Sil" aria-label="Sil">
+        <button type="button" data-del="${esc(a.id)}" title="Sil" aria-label="Sil">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>
         </button>
       </div>
-    </div>`).join('');
+    </div>`).join('') : `<div class="empty-state" style="padding:24px 0"><p>Henüz haber yok.</p></div>`;
 
   list.querySelectorAll('[data-edit]').forEach(btn=>{
     btn.addEventListener('click', ()=> loadArticleIntoForm(btn.dataset.edit));
@@ -914,13 +1119,14 @@ function drawAdminList(){
     btn.addEventListener('click', ()=>{
       const id = btn.dataset.del;
       const a = ARTICLES.find(x=>x.id===id);
+      if(!a) return;
       if(confirm(`"${a.title}" haberini silmek istediğinize emin misiniz?`)){
         ARTICLES = ARTICLES.filter(x=>x.id!==id);
         saveArticles(ARTICLES);
+        if(editingId===id) resetForm();
         drawAdminList();
         buildTicker();
         toast('Haber silindi');
-        if(editingId===id){ editingId=null; resetForm(); }
       }
     });
   });
@@ -930,37 +1136,39 @@ function loadArticleIntoForm(id){
   const a = ARTICLES.find(x=>x.id===id);
   if(!a) return;
   editingId = id;
-  document.getElementById('form-title').textContent = 'Haberi düzenle';
-  document.getElementById('f-title').value = a.title;
-  document.getElementById('f-cat').value = a.cat;
-  document.getElementById('f-author').value = a.author;
-  document.getElementById('f-summary').value = a.summary;
-  document.getElementById('f-body').value = a.body.join('\n\n');
-  document.getElementById('f-featured').checked = !!a.featured;
-  document.getElementById('f-breaking').checked = !!a.breaking;
-  document.getElementById('submit-btn').textContent = 'Güncelle';
+  $('form-title').textContent = 'Haberi düzenle';
+  $('f-title').value = a.title;
+  $('f-cat').value = catBySlug(a.cat) ? a.cat : CATEGORIES[0].slug;
+  $('f-author').value = a.author;
+  $('f-summary').value = a.summary;
+  $('f-body').value = (a.body||[]).join('\n\n');
+  $('f-featured').checked = !!a.featured;
+  $('f-breaking').checked = !!a.breaking;
+  $('submit-btn').textContent = 'Güncelle';
+  $('cancel-edit').hidden = false;
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
 function resetForm(){
-  const form = document.getElementById('article-form');
+  editingId = null;
+  const form = $('article-form');
   if(!form) return;
   form.reset();
-  document.getElementById('form-title').textContent = 'Yeni haber ekle';
-  document.getElementById('submit-btn').textContent = 'Yayınla';
+  $('form-title').textContent = 'Yeni haber ekle';
+  $('submit-btn').textContent = 'Yayınla';
+  $('cancel-edit').hidden = true;
 }
 
 function onAdminSubmit(e){
   e.preventDefault();
-  const title = document.getElementById('f-title').value.trim();
-  const cat = document.getElementById('f-cat').value;
-  const author = document.getElementById('f-author').value.trim();
-  const summary = document.getElementById('f-summary').value.trim();
-  const bodyText = document.getElementById('f-body').value.trim();
-  const featured = document.getElementById('f-featured').checked;
-  const breaking = document.getElementById('f-breaking').checked;
+  const title = $('f-title').value.trim();
+  const cat = $('f-cat').value;
+  const author = $('f-author').value.trim();
+  const summary = $('f-summary').value.trim();
+  const bodyText = $('f-body').value.trim();
+  const featured = $('f-featured').checked;
+  const breaking = $('f-breaking').checked;
   const body = bodyText.split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean);
-  const today = new Date().toISOString().slice(0,10);
 
   if(editingId){
     const idx = ARTICLES.findIndex(x=>x.id===editingId);
@@ -968,10 +1176,9 @@ function onAdminSubmit(e){
       ARTICLES[idx] = {...ARTICLES[idx], title, cat, author, summary, body, featured, breaking, lede:summary};
     }
     toast('Haber güncellendi');
-    editingId = null;
   } else {
     const id = 'u' + Date.now();
-    ARTICLES.unshift({id, cat, author, date:today, title, summary, lede:summary, body, featured, breaking});
+    ARTICLES.unshift({id, cat, author, date:todayISO(), title, summary, lede:summary, body, featured, breaking});
     toast('Haber yayınlandı');
   }
   saveArticles(ARTICLES);
@@ -984,6 +1191,7 @@ function onAdminSubmit(e){
    Başlat
    ========================================================= */
 
+initTheme();
 buildStaticNav();
 buildTicker();
 window.addEventListener('hashchange', render);
